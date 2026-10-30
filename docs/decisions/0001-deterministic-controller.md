@@ -31,6 +31,16 @@ SQLite claims prevent concurrent controller processes from repeating a review.
 The deployment must preserve the state database; copying the controller into
 fresh scheduled runners would lose that guarantee.
 
-The first local Fabro adapter is intentionally not a remote artifact transport.
-Authenticated ACP execution, worker isolation and cancellation need a real pilot
-before a continuously running bot is enabled.
+The local Fabro adapter runs on the same machine as the controller. Authenticated
+Kiro ACP has been exercised with known-defect and clean packets. A deterministic
+ACP fixture confirmed server cancellation and worker termination.
+
+Each attempt uses its own workspace and copies a canonical tool-denial profile
+from outside `.kiro`. The native ACP agent mode is selected explicitly before
+prompting. The controller writes the final response and checks exact revision
+and diff anchors. Workflow and worker artifacts join the prompt in the policy
+digest.
+
+Production worker isolation, native managed-launcher cancellation and a real
+green-check GitHub PR with COMMENT publication remain required milestones before
+continuous operation.

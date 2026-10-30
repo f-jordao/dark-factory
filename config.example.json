@@ -2,6 +2,14 @@
   "required_checks": ["tests"],
   "review_version": "v1",
   "review_prompt": "prompts/pr-review.md",
+  "review_artifacts": [
+    "workers/kiro/reviewer.json",
+    "workflows/pr-review/workflow.fabro",
+    "workflows/pr-review/workflow.toml",
+    "scripts/kiro_review_acp.py",
+    "scripts/run_fabro_review.py",
+    "dark_factory/fabro.py"
+  ],
   "review_command": [
     "{python}",
     "{project}/scripts/run_fabro_review.py",

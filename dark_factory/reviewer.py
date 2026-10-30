@@ -17,7 +17,7 @@ class CommandReviewer:
         if not self.policy.review_command:
             raise ValueError("No review command configured")
         directory = self.run_directory / key
-        directory.mkdir(parents=True, exist_ok=True)
+        directory.mkdir(parents=True, exist_ok=True, mode=0o700)
         input_path, output_path = directory / "input.json", directory / "output.json"
         input_path.write_text(json.dumps(packet, indent=2) + "\n")
         output_path.unlink(missing_ok=True)
@@ -30,15 +30,26 @@ class CommandReviewer:
             for token, value in substitutions.items():
                 argument = argument.replace(token, value)
             command.append(argument)
+        environment = os.environ.copy()
+        environment["DARK_FACTORY_REVIEW_TIMEOUT_SECONDS"] = str(
+            max(1, self.policy.timeout_seconds - 20)
+        )
         with (directory / "worker.log").open("w") as log:
+            worker = subprocess.Popen(
+                command, cwd=self.project_root, env=environment, stdout=log,
+                stderr=subprocess.STDOUT,
+            )
             try:
-                completed = subprocess.run(
-                    command, cwd=self.project_root, env=os.environ.copy(), stdout=log,
-                    stderr=subprocess.STDOUT, timeout=self.policy.timeout_seconds,
-                )
+                returncode = worker.wait(timeout=self.policy.timeout_seconds)
             except subprocess.TimeoutExpired as error:
+                worker.terminate()
+                try:
+                    worker.wait(timeout=20)
+                except subprocess.TimeoutExpired:
+                    worker.kill()
+                    worker.wait()
                 raise RuntimeError("Review worker timed out; see " + str(log.name)) from error
-        if completed.returncode:
+        if returncode:
             raise RuntimeError("Review worker failed; see " + str(directory / "worker.log"))
         if not output_path.is_file() or output_path.stat().st_size > 150_000:
             raise ValueError("Review worker did not produce an acceptable output.json")

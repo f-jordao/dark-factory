@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
+from dark_factory.cli import load_policy
 from dark_factory.github import GitHub
 from dark_factory.models import Policy, Snapshot
 from dark_factory.reviewer import CommandReviewer
@@ -90,6 +91,43 @@ class AdapterTests(unittest.TestCase):
             packet = {"title": "$(touch NEVER_EXECUTE_THIS)"}
             self.assertEqual(reviewer.review("key", packet)["received"], packet)
             self.assertFalse((root / "NEVER_EXECUTE_THIS").exists())
+
+    def test_worker_timeout_allows_graceful_cancellation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            worker = root / "worker.py"
+            worker.write_text(
+                "import pathlib,signal,sys,time\n"
+                "def stop(signum,frame):\n"
+                "    pathlib.Path('cancelled').write_text('confirmed')\n"
+                "    sys.exit(0)\n"
+                "signal.signal(signal.SIGTERM,stop)\n"
+                "time.sleep(60)\n"
+            )
+            policy = Policy(("tests",), (sys.executable, str(worker)), timeout_seconds=1)
+            reviewer = CommandReviewer(policy, root / "runs", root)
+            with self.assertRaisesRegex(RuntimeError, "timed out"):
+                reviewer.review("key", {})
+            self.assertEqual((root / "cancelled").read_text(), "confirmed")
+
+    def test_changed_worker_artifact_invalidates_policy_digest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "prompt.md").write_text("review instructions")
+            (root / "profile.json").write_text('{"tools":[]}')
+            config = root / "config.json"
+            config.write_text(json.dumps({
+                "review_prompt": "prompt.md", "review_artifacts": ["profile.json"],
+            }))
+            before, _ = load_policy(config)
+            (root / "profile.json").write_text('{"tools":["shell"]}')
+            after, _ = load_policy(config)
+            self.assertNotEqual(before.digest, after.digest)
+            config.write_text(json.dumps({
+                "review_prompt": "prompt.md", "review_artifacts": "profile.json",
+            }))
+            with self.assertRaisesRegex(ValueError, "review_artifacts"):
+                load_policy(config)
 
 
 if __name__ == "__main__":

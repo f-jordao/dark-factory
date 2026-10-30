@@ -4,7 +4,7 @@ _version = 1
 graph = "workflow.fabro"
 
 [run]
-goal = "Review the immutable packet and write the structured result as directed by the supplied run goal."
+goal = "Review the immutable packet and return the structured JSON result as your final response."
 
 [run.environment]
 id = "dark-factory-local"

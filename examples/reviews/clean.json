@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "repo": "offline/pilot",
+  "pr_number": 2,
+  "head_sha": "cccccccccccccccccccccccccccccccccccccccc",
+  "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "title": "Local pilot fixture: configure retry duration",
+  "description": "This is an offline integration fixture, not a real GitHub PR. The delay_ms function must return the delay in milliseconds. Input seconds is a nonnegative integer, so delay_ms(2) must return 2000. Rename the parameter for clarity without changing behavior.",
+  "files": [
+    {
+      "path": "retry.py",
+      "patch": "@@ -1,2 +1,2 @@\n-def delay_ms(s):\n-    return s * 1000\n+def delay_ms(seconds):\n+    return seconds * 1000"
+    }
+  ],
+  "standards": []
+}

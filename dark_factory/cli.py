@@ -30,10 +30,18 @@ def load_policy(path):
         raise ValueError("timeout_seconds must be between 1 and 3600")
     if type(limit) is not int or not 1 <= limit <= 5_000_000:
         raise ValueError("max_patch_bytes must be between 1 and 5000000")
-    prompt = (path.parent / config.get("review_prompt", "prompts/pr-review.md")).resolve()
+    prompt = config.get("review_prompt", "prompts/pr-review.md")
+    artifacts = config.get("review_artifacts", [])
+    if not isinstance(artifacts, list) or not all(isinstance(v, str) and v for v in artifacts):
+        raise ValueError("review_artifacts must be a list of nonempty paths")
+    digest = hashlib.sha256()
+    for name in sorted(set([prompt] + artifacts)):
+        digest.update(name.encode() + b"\0")
+        digest.update((path.parent / name).resolve().read_bytes())
+        digest.update(b"\0")
     return Policy(
         tuple(checks), tuple(command), version,
-        hashlib.sha256(prompt.read_bytes()).hexdigest(), timeout, limit,
+        digest.hexdigest(), timeout, limit,
     ), path.parent
 
 
@@ -43,6 +51,11 @@ def parser():
     )
     commands = root.add_subparsers(dest="operation", required=True)
     commands.add_parser("demo", help="Run the offline lifecycle demo; no GitHub or LLM calls")
+    pilot = commands.add_parser("pilot", help="Inspect or review an offline fixture with the real worker")
+    pilot.add_argument("--fixture", choices=("known-bug", "clean"), required=True)
+    pilot.add_argument("--execute", action="store_true", help="Permit the real review worker")
+    pilot.add_argument("--config", default="config.example.json")
+    pilot.add_argument("--state", default=".dark-factory/pilot.sqlite3")
     status = commands.add_parser("status", help="Read persisted review state")
     status.add_argument("--state", default=".dark-factory/state.sqlite3")
     for operation in ("scan", "reconcile"):
@@ -79,8 +92,15 @@ def main(argv=None):
         policy, project = load_policy(args.config)
         if args.execute and not policy.review_command:
             raise ValueError("--execute requires a review_command")
-        github = GitHub(args.repo)
         reviewer = CommandReviewer(policy, Path(args.state).parent / "runs", project)
+        if args.operation == "pilot":
+            from .pilot import FixtureGitHub
+            github = FixtureGitHub(project / "examples/reviews" / (args.fixture + ".json"))
+            controller = Controller(github, state, policy, reviewer)
+            result = controller.reconcile(github.current.number, execute=args.execute)
+            print(json.dumps(dict(result, mode="offline_fixture_real_worker"), indent=2))
+            return 0
+        github = GitHub(args.repo)
         controller = Controller(github, state, policy, reviewer)
         numbers = (
             sorted(set(github.open_prs()) | set(state.active_prs(args.repo)))

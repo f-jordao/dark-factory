@@ -57,8 +57,29 @@ or publish comments without the corresponding flags.
 
 ## Connect a real review worker
 
-The supplied config points to the Fabro adapter. Follow
-[Fabro setup](docs/fabro-setup.md) before enabling it.
+**Fabro → native Kiro ACP has been exercised with your existing CLI login.**
+The known-bug fixture produced the expected finding, the clean fixture produced
+no findings, and a duplicate controller trigger reused its saved result.
+No LLM provider API key was supplied to Fabro.
+
+Start the project-local runtime, then exercise the same controller with an
+offline packet. This pilot calls the real agent when `--execute` is present,
+and cannot publish to GitHub:
+
+```bash
+python3 scripts/local_fabro.py start
+python3 -m dark_factory pilot --fixture known-bug --execute
+python3 -m dark_factory pilot --fixture known-bug --execute
+python3 -m dark_factory pilot --fixture clean --execute
+```
+
+The second identical invocation reports `review_invocations: 0`. Results are in
+`.dark-factory/runs/<review-key>/output.json`, with Fabro exports and run identity
+inside the attempt directory. Pilot readiness is synthetic fixture data; it
+never substitutes for CI on a real PR.
+
+See [Fabro setup](docs/fabro-setup.md) for requirements, authentication,
+cancellation verification and runtime management. For a real GitHub PR:
 
 ```bash
 cp config.example.json config.local.json
@@ -88,7 +109,8 @@ does not install a schedule or enable an autonomous review bot.
   ambiguous required checks block the review. No configured checks also blocks it.
 - SQLite state for PR observations, review results and concurrent process claims.
 - Review identity includes repository, PR, head SHA, base SHA and policy digest.
-- Prompt changes invalidate previous review identity.
+- Prompt, workflow, worker-profile and configured worker-source changes invalidate
+  previous review identity.
 - Eligibility checked before reasoning and again before publication.
 - Results saved before publication; posting failures reuse the saved result.
 - A durable marker identifies reviews already accepted by GitHub after an
@@ -96,12 +118,16 @@ does not install a schedule or enable an autonomous review bot.
 - Findings checked against new-side diff lines; incomplete patches are rejected.
 - Closed PRs leave active monitoring.
 - Publication is always `COMMENT`, never approval, change request or merge.
+- The Fabro run identity is persisted before execution. Timeout or interruption
+  requests server-side cancellation and records whether it was confirmed.
+- Kiro receives the packet in its prompt, returns JSON, and has a tool-denial
+  profile. The controller writes the result; the agent needs no file tools.
 
 ## Boundaries of this first slice
 
-The deterministic controller and command-worker interface are tested. The
-Fabro/Kiro files are an integration template; an actual authenticated ACP review
-has not yet been exercised end to end.
+The controller and authenticated Fabro/Kiro review stage are exercised locally.
+Review publication has controller tests but has not been exercised against a
+real GitHub PR. Hosted CI must become available before the green-check PR pilot.
 
 Review context is currently the changed-file patches, PR description and selected
 root standards files at the pinned base SHA. It does not yet retrieve linked
@@ -113,10 +139,10 @@ between those operations. `commit_id` pins the posted review to its reviewed hea
 it does not make the read and write atomic. Native required-review enforcement
 belongs in GitHub rulesets.
 
-The local Fabro adapter is not a security boundary. A review prompt's tool
-restrictions must be backed by harness permissions and worker isolation before
-running on untrusted repositories. Controller credentials should not be available
-to a production worker.
+The local Fabro adapter runs on the same machine and user account. Its native
+Kiro profile denies tools and its ACP proxy refuses permission callbacks; the
+successful pilot exports contained no tool events. A separate production worker
+should receive only its review packet, with no controller publication credential.
 
 ## Where this is going
 
@@ -134,6 +160,6 @@ describe the current direction.
 
 ## Verification
 
-See [verification status](docs/verification.md) for the initial checks. Local
-tests and offline Fabro validation pass. GitHub-hosted CI is currently unable
+See [verification status](docs/verification.md) for the exercised cases and
+limitations. Local tests and Fabro validation pass. GitHub-hosted CI is unable
 to start because GitHub reports an account billing or spending-limit issue.

@@ -5,3 +5,5 @@ __pycache__/
 *.egg-info/
 .DS_Store
 config.local.json
+.kiro/agents/dark-factory-reviewer.json
+.kiro/settings.json

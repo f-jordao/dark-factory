@@ -1,12 +1,15 @@
 # Next milestones
 
-## 1. Exercise the Fabro + Kiro review stage
+## 1. Finish the GitHub PR pilot
 
-- Install and configure a local Fabro server with a native Kiro ACP worker.
-- Review a controlled PR with known defects and inspect its structured output.
-- Verify authentication, file access, tool permissions, timeouts and cancellation.
-- Confirm the subscription-backed harness behavior in the actual setup.
-- Publish its findings only after inspecting them.
+Completed: project-local Fabro runtime, native Kiro ACP with existing login,
+known-defect and clean fixture reviews, validated JSON output, duplicate
+suppression, permission denial, cancellation check and runtime restart.
+
+- Resolve the GitHub-hosted CI account blocker or supply a configured runner.
+- Review a real controlled PR after its required checks are green.
+- Inspect its findings, then exercise COMMENT publication and recovery.
+- Verify native Kiro cancellation under the actual managed launcher.
 
 ## 2. Connect GitHub events and durable scheduling
 

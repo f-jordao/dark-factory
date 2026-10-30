@@ -1,5 +1,5 @@
 digraph PRReview {
-    graph [default_fidelity="full", default_max_retries=0]
+    graph [default_fidelity="full", default_max_retries=0, on_failure="exit"]
     start [shape=Mdiamond, label="Eligible revision"]
     review [
         shape=box,
@@ -8,6 +8,8 @@ digraph PRReview {
         acp.command="kiro-cli acp",
         prompt="@../../prompts/pr-review.md",
         timeout="12m",
+        on_failure="exit",
+        goal_gate=true,
         max_retries=0
     ]
     exit [shape=Msquare, label="Return findings to controller"]

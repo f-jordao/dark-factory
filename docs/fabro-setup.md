@@ -1,70 +1,128 @@
-# Fabro + Kiro review worker
+# Fabro + native Kiro review worker
 
-This is a same-machine integration template. The controller is operational
-without Fabro for its offline demo and GitHub inspection. An authenticated ACP
-review remains the next integration milestone.
+The same-machine adapter has been exercised with Fabro 0.254.0 and Kiro CLI
+2.36.0, using the existing Kiro login. It gives Kiro an immutable review packet
+and captures its final JSON response. The controller manages eligibility,
+deduplication and publication.
 
-## Requirements
+## Start the local runtime
 
-- Fabro CLI and a configured, authenticated Fabro server on the same machine.
-- Kiro CLI installed and signed in on the machine executing the ACP process.
-- A server-managed local environment named `dark-factory-local`.
-- An explicit Kiro tool policy allowing packet reads and writing the result file.
+Requirements: Python 3.9+, authenticated GitHub CLI, and an installed,
+authenticated Kiro CLI with the v3 ACP engine. The pinned Fabro installer
+supports macOS arm64 and Linux arm64/x86_64.
 
-Follow [Fabro installation](https://docs.fabro.sh/getting-started/installation)
-and its setup wizard. A checked archive of Fabro 0.254.0 was used for offline
-workflow validation during this repository's creation; it is not installed by
-this project.
-
-Merge the environment in [the server fragment](fabro-server.example.toml) into
-the server's generated `settings.toml`. Preserve the generated authentication and
-storage settings. The repository's `.fabro/project.toml` declares the same
-environment for local validation; that client-side declaration is not transmitted
-to the server.
+From the repository:
 
 ```bash
-fabro validate workflows/pr-review/workflow.toml
-kiro-cli acp --help
+python3 scripts/local_fabro.py start
+python3 scripts/local_fabro.py status
 ```
 
-The workflow contains start → one ACP review stage → exit. It uses
-`acp.command="kiro-cli acp"`, disables automatic review retries and disables
-Fabro's managed Git run branch. There are no agent polling or routing stages.
+On first start, the deterministic setup script downloads the pinned Fabro release
+through `gh`, checks its release checksum, and configures a loopback-only server.
+It stores its binary, environment catalog, state and private authentication
+secrets under the Git-ignored `.dark-factory/runtime/`. It authenticates the
+Fabro CLI to this server without changing the user's global server configuration.
+These management commands never invoke an LLM.
 
-The adapter supplies immutable packet and output paths through `--goal-file`.
-Absolute host paths require the server's local worker to run on the same machine.
-For Docker, Daytona or a remote server, add explicit packet upload and result
-download. Those transports are not implemented by this adapter.
+```bash
+python3 scripts/local_fabro.py stop
+python3 scripts/local_fabro.py start
+```
 
-## Authentication and subscriptions
+`stop` verifies the recorded process's executable and server identity before
+terminating it. Stop only after active work has finished. The adapter prefers the
+project's pinned binary; `DARK_FACTORY_FABRO_BINARY` is an explicit override.
 
-ACP authentication belongs to the external harness, not Fabro's model provider
-configuration. Kiro's native ACP command uses the CLI login session. Verify the
-actual account and entitlement during the pilot; this project does not store or
-copy login tokens.
+The server's `dark-factory-local` environment uses its local execution provider.
+The repository `.fabro/project.toml` serves offline validation; the setup script
+creates the server's separate environment catalog. This adapter does not upload
+packets to remote or container workers.
 
-A Claude ACP adapter can replace the Kiro command later. It must satisfy the
-same structured-output contract and supported harness authentication. Changing
-the worker behavior requires bumping `review_version` in the controller config.
+## Exercise the worker
 
-## Exercise before enabling a schedule
+```bash
+python3 -m dark_factory pilot --fixture known-bug
+python3 -m dark_factory pilot --fixture known-bug --execute
+python3 -m dark_factory pilot --fixture known-bug --execute
+python3 -m dark_factory pilot --fixture clean --execute
+```
 
-Create a controlled PR, wait for its configured `tests` check, then run with
-`--execute` alone. Check the saved `input.json`, `output.json` and worker log.
-Test a known defect, a clean change and a commit arriving during review.
+Inspection reports `would_review`, with zero agent invocations. Execution uses
+the normal controller claims and a separate pilot state database. The second
+identical trigger reuses the saved result. Fixtures use the reserved
+`offline/pilot` namespace, synthetic readiness, and no GitHub client or publisher.
+They cannot attest that a real PR's checks are green.
 
-Test harness permission failures, malformed output and worker cancellation.
-The controller times out its command; terminating the Fabro CLI is not proof that
-the server cancelled its run. Before using `--retry` after a timeout, check and
-stop any still-active Fabro worker. Automatic cancellation is a tracked follow-up.
+Inspect `.dark-factory/runs/<review-key>/input.json`, `output.json` and `worker.log`.
+Each Fabro attempt has `run.json`, its generated workflow, a workspace profile
+and an export of the stage responses and events. Runtime artifacts can contain
+private review context; keep them local.
 
-Only after inspecting the result should a pilot invocation add `--publish`.
-The publisher issues COMMENT reviews and does not approve or merge.
+For a real PR, configure exact required-check names and use `reconcile --execute`.
+`--publish` is separately required to post a COMMENT review. No schedule or
+automatic merge is installed.
+
+## Authentication and the native ACP mode
+
+Fabro starts the installed `kiro-cli` launcher. The pilot used its existing
+authenticated SSO session; no model-provider API key was supplied to Fabro.
+The pilot proves this login works for native ACP. It does not establish which
+subscription or organizational billing rules apply to another account.
+
+Kiro's v3 ACP engine exposes agents as session modes. The deterministic proxy
+holds `session/new` until `session/set_mode` selects `dark-factory-reviewer`.
+If that mode is unavailable or rejected, the review fails instead of using the
+default agent.
+
+The canonical profile is [workers/kiro/reviewer.json](../workers/kiro/reviewer.json).
+Each attempt copies it into its own workspace, disables inherited default
+resources, denies tools and declines every ACP permission callback. Packet data
+arrives in the prompt, so file-reading and file-writing tools are unnecessary.
+The controller parses, validates and writes the final response.
+
+The managed Kiro launcher on the pilot machine injects a credential-agent
+configuration into workspace agent files. The canonical source stays outside
+`.kiro` so this cannot modify checked-in policy. Its deny-all permission rule is
+retained; both successful pilot exports contained no tool-related events.
+This local setup shares the user's machine and is not a production isolation
+boundary.
+
+## Failure handling
+
+The controller hashes the prompt and configured review artifacts into the review
+identity. Profile, workflow or worker-source changes invalidate earlier results.
+Fabro's run ID is persisted before `start`, then the adapter polls its server
+deterministically. A successful run must contain exactly one successful review
+stage before output is accepted.
+
+The workflow marks review as a goal gate with no retry target. Fabro 0.254.0's
+validator warns about that missing target; the omission is intentional so a
+failed review cannot reach a successful exit or automatically repeat reasoning.
+Actual review failures require explicit controller retry.
+
+Timeout, SIGTERM or interruption requests cancellation at the server and records
+`cancellation_confirmed` in `run.json`. The outer worker timeout allows a grace
+period for this cleanup. If cancellation is unconfirmed, inspect the saved run
+ID before retrying; the record never claims that an unconfirmed run stopped.
+Publication retries reuse saved findings rather than repeating review.
+
+Exercise actual cancellation without making any model calls:
+
+```bash
+python3 scripts/verify_fabro_cancel.py
+```
+
+This opt-in check runs a deterministic ACP peer on the real Fabro server,
+waits until it reaches the work stage, times out, and verifies both terminal
+server state and worker termination. It is separate from the ordinary offline
+test suite.
 
 ## Primary references
 
+- [Pinned Fabro source](https://github.com/fabro-sh/fabro/tree/v0.254.0)
 - [Fabro ACP backend](https://docs.fabro.sh/core-concepts/agents)
 - [Fabro run configuration](https://docs.fabro.sh/execution/run-configuration)
 - [Fabro server configuration](https://docs.fabro.sh/administration/server-configuration)
-- [Fabro node types](https://docs.fabro.sh/workflows/stages-and-nodes)
 - [Kiro ACP](https://kiro.dev/docs/cli/acp/)
+- [Kiro agent configuration](https://kiro.dev/docs/cli/custom-agents/configuration-reference/)
