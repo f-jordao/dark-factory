@@ -131,3 +131,9 @@ See [skill integration](docs/skills.md) and [next milestones](ROADMAP.md).
 The earlier framework comparison is retained as
 [research context](docs/research.md). This README and the architecture decisions
 describe the current direction.
+
+## Verification
+
+See [verification status](docs/verification.md) for the initial checks. Local
+tests and offline Fabro validation pass. GitHub-hosted CI is currently unable
+to start because GitHub reports an account billing or spending-limit issue.
