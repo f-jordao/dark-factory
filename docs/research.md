@@ -2,7 +2,8 @@
 
 # Open-source orchestration for an agentic software lifecycle
 
-Research date: 30 October 2026  
+Research date: 30 October 2026
+
 Scope: GitHub repositories; incoming requests, features, bugs and operational demand through classification, implementation, human decisions, verification and merge.
 
 ## Recommendation
