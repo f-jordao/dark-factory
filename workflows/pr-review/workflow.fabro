@@ -1,0 +1,15 @@
+digraph PRReview {
+    graph [default_fidelity="full", default_max_retries=0]
+    start [shape=Mdiamond, label="Eligible revision"]
+    review [
+        shape=box,
+        label="Code review — the only agent stage",
+        backend="acp",
+        acp.command="kiro-cli acp",
+        prompt="@../../prompts/pr-review.md",
+        timeout="12m",
+        max_retries=0
+    ]
+    exit [shape=Msquare, label="Return findings to controller"]
+    start -> review -> exit
+}

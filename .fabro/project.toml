@@ -1,0 +1,6 @@
+_version = 1
+
+# This catalog supports local validation. The running server must also have
+# this named environment in its own settings.toml; the client does not send it.
+[environments.dark-factory-local]
+provider = "local"

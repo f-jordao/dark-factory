@@ -1,0 +1,7 @@
+.dark-factory/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.DS_Store
+config.local.json
