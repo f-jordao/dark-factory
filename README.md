@@ -62,6 +62,10 @@ The known-bug fixture produced the expected finding, the clean fixture produced
 no findings, and a duplicate controller trigger reused its saved result.
 No LLM provider API key was supplied to Fabro.
 
+Kiro is connected through Fabro's generic ACP backend and this project's
+deterministic adapter. It is not a named integration or an API-provider tile
+in Fabro's settings; Kiro manages its own authentication and model selection.
+
 Start the project-local runtime, then exercise the same controller with an
 offline packet. This pilot calls the real agent when `--execute` is present,
 and cannot publish to GitHub:
@@ -77,6 +81,12 @@ Fabro's built-in web UI is enabled on the loopback address printed by `start`.
 It shows real worker runs, stages, logs and timing. Browser sign-in uses the
 project's private dev token; the existing API authentication remains enabled.
 The separate demand-to-merge diagram is an illustrative lifecycle design.
+
+Find the executed workflow under **Runs → PRReview → Graph Source**.
+The **WORKFLOWS** heading in Settings groups variables and secrets.
+The installed Fabro 0.254.0 server does not implement the workflow-listing API,
+and no automation has been installed. The native UI is currently a view of
+worker execution, not a catalog of the complete lifecycle.
 
 The second identical invocation reports `review_invocations: 0`. Results are in
 `.dark-factory/runs/<review-key>/output.json`, with Fabro exports and run identity

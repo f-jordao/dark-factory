@@ -1,4 +1,4 @@
-# Fabro + native Kiro review worker
+# Fabro + Kiro ACP review worker
 
 The same-machine adapter has been exercised with Fabro 0.254.0 and Kiro CLI
 2.36.0, using the existing Kiro login. It gives Kiro an immutable review packet
@@ -31,6 +31,22 @@ The server also exposes Fabro's built-in UI at the loopback address printed by
 logs, artifacts and timing; it does not yet represent the full demand-routing
 policy. Browser and CLI sessions use the same authenticated local server.
 No GitHub App registration is required for this local dev-token sign-in.
+
+### What appears in the native UI
+
+- **Runs → PRReview → Graph Source** shows the actual submitted review graph.
+- **Settings → WORKFLOWS** contains variables and secrets settings.
+- **Automations** is empty because no recurring trigger is installed.
+- Kiro does not appear in **Models** or **Integrations**. Fabro's generic ACP
+  backend launches Kiro through our adapter; the CLI owns its authentication
+  and model selection.
+
+The installed 0.254.0 server returns HTTP 501 for `GET /api/v1/workflows`.
+The newer `v0.400.0-nightly.0` source also routes workflow listing, detail and
+run-list endpoints to `not_implemented` in real mode. This source inspection
+does not validate that prerelease as a working replacement for our runtime.
+An upgrade alone is therefore not a verified solution for a workflow catalog.
+The lifecycle diagram is a design; only the review worker graph has been run.
 
 ```bash
 python3 scripts/local_fabro.py stop
@@ -128,6 +144,7 @@ test suite.
 ## Primary references
 
 - [Pinned Fabro source](https://github.com/fabro-sh/fabro/tree/v0.254.0)
+- [Prerelease real-mode workflow routes](https://github.com/fabro-sh/fabro/blob/v0.400.0-nightly.0/lib/apps/fabro-server/src/server/handler/mod.rs#L188)
 - [Fabro ACP backend](https://docs.fabro.sh/core-concepts/agents)
 - [Fabro run configuration](https://docs.fabro.sh/execution/run-configuration)
 - [Fabro server configuration](https://docs.fabro.sh/administration/server-configuration)

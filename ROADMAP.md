@@ -1,5 +1,19 @@
 # Next milestones
 
+## 0. Resolve the lifecycle UI gap
+
+Fabro's authenticated run UI works, but the installed stable server's workflow
+catalog returns HTTP 501. Inspection of `v0.400.0-nightly.0` finds the same
+unimplemented real-mode catalog routes. An upgrade has not been validated
+as a fix. Kiro is connected through generic ACP, not a named settings integration.
+
+- Decide the lifecycle control surface before expanding worker flows. A small
+  Dark Factory console could show registered flows, deterministic PR readiness,
+  saved results and human decisions, with links to Fabro worker runs.
+- Show which stages are implemented and which are design-only.
+- Keep readiness checks, scheduling and status refresh free of model calls.
+- Complete the PR review path before adding feature implementation workflows.
+
 ## 1. Finish the GitHub PR pilot
 
 Completed: project-local Fabro runtime, native Kiro ACP with existing login,

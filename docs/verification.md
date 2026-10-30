@@ -15,6 +15,8 @@ Date: 30 October 2026.
 | Live Fabro server cancellation with deterministic ACP fixture | Pass; terminal failed run and worker stopped, zero LLM calls |
 | Local server stop/start and CLI reauthentication | Pass; runtime configuration and state reused |
 | Fabro built-in web UI and local browser sign-in | Pass; authenticated run history and successful review timing visible |
+| Native workflow catalog, Fabro 0.254.0 | Unavailable; authenticated `GET /api/v1/workflows` returns HTTP 501 |
+| Newer prerelease workflow catalog | Source inspection only: `v0.400.0-nightly.0` real routes still use `not_implemented`; no runtime upgrade performed |
 | Tool activity in successful ACP exports | No tool-related events observed |
 | Actual review publication | Not yet exercised; offline publisher tests pass |
 
@@ -27,6 +29,12 @@ The review packets in the authenticated pilot were offline fixtures, not real
 GitHub PRs. Their synthetic readiness cannot bypass CI on a GitHub repository.
 No model-provider API key was supplied to Fabro; Kiro used its existing login.
 Account billing entitlement was not inferred from authentication.
+
+Kiro is an ACP worker, not a named Fabro settings integration. Its authentication
+and model selection remain in Kiro. The actual review graph is visible under
+Runs → PRReview → Graph Source. Settings' WORKFLOWS heading groups variables
+and secrets, and the automation list is empty. The full lifecycle diagram
+has not been deployed as an executable workflow.
 
 Local evidence, excluded from Git:
 
