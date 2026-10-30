@@ -9,7 +9,8 @@ address = "127.0.0.1:3000"
 methods = ["dev-token"]
 
 [server.web]
-enabled = false
+enabled = true
+url = "http://127.0.0.1:3000"
 
 [server.sandbox.providers.local]
 enabled = true

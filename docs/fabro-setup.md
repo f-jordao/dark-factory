@@ -25,6 +25,13 @@ secrets under the Git-ignored `.dark-factory/runtime/`. It authenticates the
 Fabro CLI to this server without changing the user's global server configuration.
 These management commands never invoke an LLM.
 
+The server also exposes Fabro's built-in UI at the loopback address printed by
+`start`. Browser sign-in accepts the project-local dev token stored in
+`.dark-factory/runtime/dev-token`. The UI provides real run history, stages,
+logs, artifacts and timing; it does not yet represent the full demand-routing
+policy. Browser and CLI sessions use the same authenticated local server.
+No GitHub App registration is required for this local dev-token sign-in.
+
 ```bash
 python3 scripts/local_fabro.py stop
 python3 scripts/local_fabro.py start

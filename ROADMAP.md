@@ -4,7 +4,8 @@
 
 Completed: project-local Fabro runtime, native Kiro ACP with existing login,
 known-defect and clean fixture reviews, validated JSON output, duplicate
-suppression, permission denial, cancellation check and runtime restart.
+suppression, permission denial, cancellation check, runtime restart and the
+authenticated Fabro web UI.
 
 - Resolve the GitHub-hosted CI account blocker or supply a configured runner.
 - Review a real controlled PR after its required checks are green.
@@ -33,7 +34,7 @@ suppression, permission denial, cancellation check and runtime restart.
 - Configure GitHub rulesets, required checks and code-owner reviews.
 - Resolve linked requirements and standards at immutable revisions.
 - Provide workers with read-only repository snapshots and no publication credential.
-- Surface lifecycle state in a visual application.
+- Show demand-routing state and human decisions alongside Fabro's worker UI.
 - Add implementation and verification flows after the review slice is validated.
 
 Automatic merge is outside the initial pilot.

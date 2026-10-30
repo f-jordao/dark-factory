@@ -24,6 +24,10 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual((runtime / "dev-token").read_text(), secret)
             self.assertEqual((runtime / "dev-token").stat().st_mode & 0o777, 0o600)
             self.assertNotIn("[environments.", (runtime / "server.toml").read_text())
+            self.assertIn(
+                '[server.web]\nenabled = true\nurl = "http://127.0.0.1:12345"',
+                (runtime / "server.toml").read_text(),
+            )
             self.assertEqual(
                 (runtime / "environments/dark-factory-local.toml").read_text(),
                 'provider = "local"\n',

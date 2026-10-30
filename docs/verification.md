@@ -14,6 +14,7 @@ Date: 30 October 2026.
 | Real worker through the controller, repeated trigger | First call reviewed; second reused the result with zero agent invocations |
 | Live Fabro server cancellation with deterministic ACP fixture | Pass; terminal failed run and worker stopped, zero LLM calls |
 | Local server stop/start and CLI reauthentication | Pass; runtime configuration and state reused |
+| Fabro built-in web UI and local browser sign-in | Pass; authenticated run history and successful review timing visible |
 | Tool activity in successful ACP exports | No tool-related events observed |
 | Actual review publication | Not yet exercised; offline publisher tests pass |
 

@@ -96,7 +96,7 @@ def setup():
         '_version = 1\n'
         '[server.listen]\ntype = "tcp"\naddress = ' + json.dumps(address) + '\n'
         '[server.auth]\nmethods = ["dev-token"]\n'
-        '[server.web]\nenabled = false\n'
+        '[server.web]\nenabled = true\nurl = ' + json.dumps("http://" + address) + '\n'
         '[server.storage]\nroot = ' + json.dumps(str(RUNTIME / "storage")) + '\n'
         '[server.sandbox.providers.local]\nenabled = true\n'
     )
@@ -114,7 +114,7 @@ def start():
         with (RUNTIME / "server.log").open("a") as log:
             process = subprocess.Popen(
                 [str(RUNTIME / "bin/fabro"), "server", "start", "--foreground",
-                 "--no-web", "--config", str(RUNTIME / "server.toml")],
+                 "--web", "--config", str(RUNTIME / "server.toml")],
                 env=environment, stdout=log, stderr=subprocess.STDOUT,
                 start_new_session=True,
             )
@@ -139,6 +139,7 @@ def start():
     if login.returncode:
         raise RuntimeError("Fabro CLI authentication failed")
     print("Project-local Fabro server is running and its CLI is authenticated.")
+    print("Fabro web UI: " + (RUNTIME / "server-url").read_text().strip())
 
 
 def stop():

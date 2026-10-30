@@ -73,6 +73,11 @@ python3 -m dark_factory pilot --fixture known-bug --execute
 python3 -m dark_factory pilot --fixture clean --execute
 ```
 
+Fabro's built-in web UI is enabled on the loopback address printed by `start`.
+It shows real worker runs, stages, logs and timing. Browser sign-in uses the
+project's private dev token; the existing API authentication remains enabled.
+The separate demand-to-merge diagram is an illustrative lifecycle design.
+
 The second identical invocation reports `review_invocations: 0`. Results are in
 `.dark-factory/runs/<review-key>/output.json`, with Fabro exports and run identity
 inside the attempt directory. Pilot readiness is synthetic fixture data; it
