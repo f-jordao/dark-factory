@@ -1,0 +1,230 @@
+{
+  "_version": 1,
+  "id": "demand-intake",
+  "status": "scaffold",
+  "enabled": false,
+  "limits": {
+    "max_repair_attempts": 2,
+    "max_stage_visits": 3,
+    "on_exhaustion": "human"
+  },
+  "nodes": [
+    {
+      "id": "capture",
+      "stage": "capture-demand"
+    },
+    {
+      "id": "classify",
+      "stage": "classify-demand"
+    },
+    {
+      "id": "known",
+      "stage": "classification-known"
+    },
+    {
+      "id": "choose_type",
+      "stage": "classify-human",
+      "roles": [
+        "triage-owner"
+      ],
+      "approval": false
+    },
+    {
+      "id": "record_type",
+      "stage": "record-classification"
+    },
+    {
+      "id": "evidence",
+      "stage": "collect-evidence"
+    },
+    {
+      "id": "policy",
+      "stage": "apply-policy"
+    },
+    {
+      "id": "route",
+      "stage": "choose-route"
+    },
+    {
+      "id": "stopped",
+      "stage": "record-stop"
+    },
+    {
+      "id": "dispatch_bug",
+      "stage": "dispatch",
+      "label": "Bug Fix",
+      "workflow": "bug-fix"
+    },
+    {
+      "id": "dispatch_feature",
+      "stage": "dispatch",
+      "label": "Feature Delivery",
+      "workflow": "feature-delivery"
+    },
+    {
+      "id": "dispatch_maintenance",
+      "stage": "dispatch",
+      "label": "Maintenance",
+      "workflow": "maintenance"
+    },
+    {
+      "id": "dispatch_security",
+      "stage": "dispatch",
+      "label": "Security Remediation",
+      "workflow": "security-remediation"
+    },
+    {
+      "id": "dispatch_incident",
+      "stage": "dispatch",
+      "label": "Incident Response",
+      "workflow": "incident-response"
+    },
+    {
+      "id": "dispatch_discovery",
+      "stage": "dispatch",
+      "label": "Discovery",
+      "workflow": "discovery"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "capture"
+    },
+    {
+      "from": "capture",
+      "to": "classify"
+    },
+    {
+      "from": "classify",
+      "to": "known"
+    },
+    {
+      "from": "known",
+      "to": "evidence",
+      "label": "Known",
+      "condition": "context.classification_known=true"
+    },
+    {
+      "from": "known",
+      "to": "choose_type",
+      "label": "Unknown"
+    },
+    {
+      "from": "record_type",
+      "to": "evidence"
+    },
+    {
+      "from": "evidence",
+      "to": "policy"
+    },
+    {
+      "from": "policy",
+      "to": "route"
+    },
+    {
+      "from": "route",
+      "to": "choose_type",
+      "label": "Missing / invalid type"
+    },
+    {
+      "from": "stopped",
+      "to": "exit"
+    },
+    {
+      "from": "route",
+      "to": "dispatch_bug",
+      "label": "Bug",
+      "condition": "context.demand_type=bug"
+    },
+    {
+      "from": "dispatch_bug",
+      "to": "exit"
+    },
+    {
+      "from": "choose_type",
+      "to": "record_type",
+      "label": "[B] Bug"
+    },
+    {
+      "from": "route",
+      "to": "dispatch_feature",
+      "label": "Feature",
+      "condition": "context.demand_type=feature"
+    },
+    {
+      "from": "dispatch_feature",
+      "to": "exit"
+    },
+    {
+      "from": "choose_type",
+      "to": "record_type",
+      "label": "[F] Feature"
+    },
+    {
+      "from": "route",
+      "to": "dispatch_maintenance",
+      "label": "Maintenance",
+      "condition": "context.demand_type=maintenance"
+    },
+    {
+      "from": "dispatch_maintenance",
+      "to": "exit"
+    },
+    {
+      "from": "choose_type",
+      "to": "record_type",
+      "label": "[M] Maintenance"
+    },
+    {
+      "from": "route",
+      "to": "dispatch_security",
+      "label": "Security",
+      "condition": "context.demand_type=security"
+    },
+    {
+      "from": "dispatch_security",
+      "to": "exit"
+    },
+    {
+      "from": "choose_type",
+      "to": "record_type",
+      "label": "[S] Security"
+    },
+    {
+      "from": "route",
+      "to": "dispatch_incident",
+      "label": "Incident",
+      "condition": "context.demand_type=incident"
+    },
+    {
+      "from": "dispatch_incident",
+      "to": "exit"
+    },
+    {
+      "from": "choose_type",
+      "to": "record_type",
+      "label": "[I] Incident"
+    },
+    {
+      "from": "route",
+      "to": "dispatch_discovery",
+      "label": "Discovery",
+      "condition": "context.demand_type=discovery"
+    },
+    {
+      "from": "dispatch_discovery",
+      "to": "exit"
+    },
+    {
+      "from": "choose_type",
+      "to": "record_type",
+      "label": "[D] Discovery"
+    },
+    {
+      "from": "choose_type",
+      "to": "stopped",
+      "label": "[X] Stop"
+    }
+  ]
+}

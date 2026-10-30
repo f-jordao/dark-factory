@@ -1,0 +1,388 @@
+{
+  "_version": 1,
+  "id": "bug-fix",
+  "status": "scaffold",
+  "enabled": false,
+  "limits": {
+    "max_repair_attempts": 2,
+    "max_stage_visits": 3,
+    "on_exhaustion": "human"
+  },
+  "nodes": [
+    {
+      "id": "validate",
+      "stage": "validate-demand"
+    },
+    {
+      "id": "scope_known",
+      "stage": "scope-known"
+    },
+    {
+      "id": "clarify_scope",
+      "stage": "scope-approval",
+      "roles": [
+        "service-owner"
+      ],
+      "approval": true,
+      "record_fields": [
+        "actor",
+        "roles",
+        "demand_id",
+        "repository",
+        "head_sha",
+        "base_sha",
+        "artifact_digest",
+        "scope_digest",
+        "policy_version",
+        "workflow_id",
+        "stage_id",
+        "target_branch"
+      ]
+    },
+    {
+      "id": "record_scope",
+      "stage": "validate-approval"
+    },
+    {
+      "id": "needs_info",
+      "stage": "request-clarification"
+    },
+    {
+      "id": "reproduce",
+      "stage": "reproduce"
+    },
+    {
+      "id": "diagnose",
+      "stage": "diagnose"
+    },
+    {
+      "id": "regression",
+      "stage": "regression-design"
+    },
+    {
+      "id": "plan",
+      "stage": "plan"
+    },
+    {
+      "id": "plan_gate",
+      "stage": "plan-required"
+    },
+    {
+      "id": "approve_plan",
+      "stage": "plan-approval",
+      "roles": [
+        "service-owner",
+        "relevant-specialist-if-R3"
+      ],
+      "approval": true,
+      "record_fields": [
+        "actor",
+        "roles",
+        "demand_id",
+        "repository",
+        "head_sha",
+        "base_sha",
+        "artifact_digest",
+        "scope_digest",
+        "policy_version",
+        "workflow_id",
+        "stage_id",
+        "target_branch"
+      ]
+    },
+    {
+      "id": "record_plan",
+      "stage": "validate-approval"
+    },
+    {
+      "id": "implement",
+      "stage": "implement"
+    },
+    {
+      "id": "verification",
+      "stage": "dispatch",
+      "label": "Verify change",
+      "workflow": "verification"
+    },
+    {
+      "id": "checks_passed",
+      "stage": "verification-result"
+    },
+    {
+      "id": "reassess",
+      "stage": "dispatch",
+      "label": "Reassess actual diff",
+      "workflow": "diff-reassessment"
+    },
+    {
+      "id": "scope_current",
+      "stage": "scope-current"
+    },
+    {
+      "id": "renew_scope",
+      "stage": "scope-approval",
+      "label": "Renew approval for expanded scope",
+      "roles": [
+        "service-owner",
+        "relevant-specialist-if-R3"
+      ],
+      "approval": true,
+      "record_fields": [
+        "actor",
+        "roles",
+        "demand_id",
+        "repository",
+        "head_sha",
+        "base_sha",
+        "artifact_digest",
+        "scope_digest",
+        "policy_version",
+        "workflow_id",
+        "stage_id",
+        "target_branch"
+      ]
+    },
+    {
+      "id": "record_renewal",
+      "stage": "validate-approval"
+    },
+    {
+      "id": "review",
+      "stage": "dispatch",
+      "label": "Independent PR review",
+      "workflow": "pr-review-lifecycle"
+    },
+    {
+      "id": "review_clear",
+      "stage": "review-clear"
+    },
+    {
+      "id": "merge_readiness",
+      "stage": "dispatch",
+      "label": "Final approvals and GitHub merge readiness",
+      "workflow": "merge-readiness"
+    },
+    {
+      "id": "rework",
+      "stage": "dispatch",
+      "label": "Bounded repair / human escalation",
+      "workflow": "rework"
+    },
+    {
+      "id": "stopped",
+      "stage": "record-stop"
+    },
+    {
+      "id": "prepare_branch",
+      "stage": "prepare-workspace"
+    },
+    {
+      "id": "prepare_pr",
+      "stage": "dispatch",
+      "label": "Prepare and optionally publish draft PR",
+      "workflow": "pr-preparation"
+    },
+    {
+      "id": "pr_available",
+      "stage": "pr-available"
+    },
+    {
+      "id": "waiting_pr",
+      "stage": "save-pr-proposal"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "validate"
+    },
+    {
+      "from": "validate",
+      "to": "scope_known"
+    },
+    {
+      "from": "scope_known",
+      "to": "reproduce",
+      "label": "Clear",
+      "condition": "context.scope_clear=true"
+    },
+    {
+      "from": "scope_known",
+      "to": "clarify_scope",
+      "label": "Ambiguous / missing"
+    },
+    {
+      "from": "clarify_scope",
+      "to": "record_scope",
+      "label": "[A] Confirm expected behavior"
+    },
+    {
+      "from": "clarify_scope",
+      "to": "needs_info",
+      "label": "[R] Clarify"
+    },
+    {
+      "from": "clarify_scope",
+      "to": "stopped",
+      "label": "[S] Stop"
+    },
+    {
+      "from": "record_scope",
+      "to": "reproduce"
+    },
+    {
+      "from": "needs_info",
+      "to": "exit"
+    },
+    {
+      "from": "reproduce",
+      "to": "diagnose"
+    },
+    {
+      "from": "diagnose",
+      "to": "regression"
+    },
+    {
+      "from": "regression",
+      "to": "plan"
+    },
+    {
+      "from": "plan",
+      "to": "plan_gate"
+    },
+    {
+      "from": "approve_plan",
+      "to": "record_plan",
+      "label": "[A] Approve"
+    },
+    {
+      "from": "approve_plan",
+      "to": "plan",
+      "label": "[R] Revise"
+    },
+    {
+      "from": "approve_plan",
+      "to": "stopped",
+      "label": "[S] Stop"
+    },
+    {
+      "from": "record_plan",
+      "to": "prepare_branch"
+    },
+    {
+      "from": "plan_gate",
+      "to": "prepare_branch",
+      "label": "Approval not required",
+      "condition": "context.plan_required=false"
+    },
+    {
+      "from": "plan_gate",
+      "to": "approve_plan",
+      "label": "Approval required / unknown"
+    },
+    {
+      "from": "implement",
+      "to": "verification"
+    },
+    {
+      "from": "verification",
+      "to": "checks_passed"
+    },
+    {
+      "from": "checks_passed",
+      "to": "reassess",
+      "label": "Passed",
+      "condition": "context.verification_passed=true"
+    },
+    {
+      "from": "checks_passed",
+      "to": "rework",
+      "label": "Failed / missing evidence"
+    },
+    {
+      "from": "reassess",
+      "to": "scope_current"
+    },
+    {
+      "from": "scope_current",
+      "to": "prepare_pr",
+      "label": "Scope current",
+      "condition": "context.scope_current=true"
+    },
+    {
+      "from": "scope_current",
+      "to": "renew_scope",
+      "label": "Broader / uncertain"
+    },
+    {
+      "from": "renew_scope",
+      "to": "record_renewal",
+      "label": "[A] Approve revised scope"
+    },
+    {
+      "from": "renew_scope",
+      "to": "rework",
+      "label": "[R] Revise"
+    },
+    {
+      "from": "renew_scope",
+      "to": "stopped",
+      "label": "[S] Stop"
+    },
+    {
+      "from": "record_renewal",
+      "to": "reassess"
+    },
+    {
+      "from": "review",
+      "to": "review_clear"
+    },
+    {
+      "from": "review_clear",
+      "to": "merge_readiness",
+      "label": "Clear",
+      "condition": "context.review_clear=true"
+    },
+    {
+      "from": "review_clear",
+      "to": "rework",
+      "label": "Findings / missing review"
+    },
+    {
+      "from": "merge_readiness",
+      "to": "exit"
+    },
+    {
+      "from": "rework",
+      "to": "exit"
+    },
+    {
+      "from": "stopped",
+      "to": "exit"
+    },
+    {
+      "from": "prepare_branch",
+      "to": "implement"
+    },
+    {
+      "from": "prepare_pr",
+      "to": "pr_available"
+    },
+    {
+      "from": "pr_available",
+      "to": "review",
+      "label": "PR available",
+      "condition": "context.pr_available=true"
+    },
+    {
+      "from": "pr_available",
+      "to": "waiting_pr",
+      "label": "Proposal saved / publication disabled"
+    },
+    {
+      "from": "waiting_pr",
+      "to": "exit"
+    }
+  ],
+  "demand_type": "bug"
+}

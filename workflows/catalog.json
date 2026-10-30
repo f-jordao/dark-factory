@@ -1,0 +1,118 @@
+{
+  "_version": 1,
+  "execution_enabled": false,
+  "stage_catalog": "stages/catalog.json",
+  "routing_policy": "policy/routing.json",
+  "workflows": [
+    {
+      "id": "demand-intake",
+      "name": "Demand intake & routing",
+      "description": "Capture, classify, assess evidence and select a demand route.",
+      "group": "shared",
+      "enabled": false,
+      "definition": "workflows/demand-intake/definition.json"
+    },
+    {
+      "id": "bug-fix",
+      "name": "Bug fix",
+      "description": "Reproduce, diagnose, plan a regression and implement a scoped fix.",
+      "group": "demand",
+      "enabled": false,
+      "definition": "workflows/bug-fix/definition.json",
+      "demand_type": "bug"
+    },
+    {
+      "id": "feature-delivery",
+      "name": "Feature delivery",
+      "description": "Clarify scope, agree acceptance, approve a plan and build the feature.",
+      "group": "demand",
+      "enabled": false,
+      "definition": "workflows/feature-delivery/definition.json",
+      "demand_type": "feature"
+    },
+    {
+      "id": "maintenance",
+      "name": "Maintenance & dependencies",
+      "description": "Inspect compatibility and consumers before applying a bounded update.",
+      "group": "demand",
+      "enabled": false,
+      "definition": "workflows/maintenance/definition.json",
+      "demand_type": "maintenance"
+    },
+    {
+      "id": "security-remediation",
+      "name": "Security remediation",
+      "description": "Assess exposure, obtain owner and specialist decisions, then prepare a controlled remedy.",
+      "group": "demand",
+      "enabled": false,
+      "definition": "workflows/security-remediation/definition.json",
+      "demand_type": "security"
+    },
+    {
+      "id": "incident-response",
+      "name": "Incident response",
+      "description": "Diagnose, propose containment, obtain operational authority and prepare a minimal hotfix.",
+      "group": "demand",
+      "enabled": false,
+      "definition": "workflows/incident-response/definition.json",
+      "demand_type": "incident"
+    },
+    {
+      "id": "discovery",
+      "name": "Discovery / investigation",
+      "description": "Read-only investigation ends in a human go, clarify or stop decision.",
+      "group": "demand",
+      "enabled": false,
+      "definition": "workflows/discovery/definition.json",
+      "demand_type": "discovery"
+    },
+    {
+      "id": "verification",
+      "name": "Verification",
+      "description": "Run configured checks and persist evidence for the exact revision.",
+      "group": "shared",
+      "enabled": false,
+      "definition": "workflows/verification/definition.json"
+    },
+    {
+      "id": "diff-reassessment",
+      "name": "Actual-diff reassessment",
+      "description": "Reassess impact and invalidate stale or expanded-scope approvals.",
+      "group": "shared",
+      "enabled": false,
+      "definition": "workflows/diff-reassessment/definition.json"
+    },
+    {
+      "id": "pr-preparation",
+      "name": "PR preparation & draft publication",
+      "description": "Describe the verified change and optionally publish a draft PR under explicit write policy.",
+      "group": "shared",
+      "enabled": false,
+      "definition": "workflows/pr-preparation/definition.json"
+    },
+    {
+      "id": "pr-review-lifecycle",
+      "name": "PR review lifecycle",
+      "description": "Inspect readiness, claim a new revision, review, save, optionally comment and observe.",
+      "group": "shared",
+      "enabled": false,
+      "definition": "workflows/pr-review-lifecycle/definition.json"
+    },
+    {
+      "id": "merge-readiness",
+      "name": "Final approvals & merge readiness",
+      "description": "Obtain revision-bound acceptance and hand off to governed GitHub merge; no merge action.",
+      "group": "shared",
+      "enabled": false,
+      "definition": "workflows/merge-readiness/definition.json"
+    },
+    {
+      "id": "rework",
+      "name": "Bounded rework & escalation",
+      "description": "Repair failed verification or review within scope; escalate after two attempts.",
+      "group": "shared",
+      "enabled": false,
+      "definition": "workflows/rework/definition.json"
+    }
+  ]
+}

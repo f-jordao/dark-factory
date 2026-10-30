@@ -1,0 +1,59 @@
+{
+  "_version": 1,
+  "id": "verification",
+  "status": "scaffold",
+  "enabled": false,
+  "limits": {
+    "max_repair_attempts": 2,
+    "max_stage_visits": 3,
+    "on_exhaustion": "human"
+  },
+  "nodes": [
+    {
+      "id": "checks",
+      "stage": "run-checks"
+    },
+    {
+      "id": "passed",
+      "stage": "verification-result"
+    },
+    {
+      "id": "save",
+      "stage": "save-evidence"
+    },
+    {
+      "id": "rework",
+      "stage": "dispatch",
+      "workflow": "rework"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "checks"
+    },
+    {
+      "from": "checks",
+      "to": "passed"
+    },
+    {
+      "from": "passed",
+      "to": "save",
+      "label": "Passed",
+      "condition": "context.verification_passed=true"
+    },
+    {
+      "from": "passed",
+      "to": "rework",
+      "label": "Failed / missing checks"
+    },
+    {
+      "from": "save",
+      "to": "exit"
+    },
+    {
+      "from": "rework",
+      "to": "exit"
+    }
+  ]
+}

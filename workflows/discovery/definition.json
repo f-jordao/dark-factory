@@ -1,0 +1,114 @@
+{
+  "_version": 1,
+  "id": "discovery",
+  "status": "scaffold",
+  "enabled": false,
+  "limits": {
+    "max_repair_attempts": 2,
+    "max_stage_visits": 3,
+    "on_exhaustion": "human"
+  },
+  "nodes": [
+    {
+      "id": "validate",
+      "stage": "validate-demand"
+    },
+    {
+      "id": "investigate",
+      "stage": "investigate"
+    },
+    {
+      "id": "impact",
+      "stage": "analyze-impact"
+    },
+    {
+      "id": "recommend",
+      "stage": "recommend"
+    },
+    {
+      "id": "decision",
+      "stage": "discovery-decision",
+      "roles": [
+        "product-owner",
+        "service-owner"
+      ],
+      "approval": true,
+      "record_fields": [
+        "actor",
+        "roles",
+        "demand_id",
+        "repository",
+        "head_sha",
+        "base_sha",
+        "artifact_digest",
+        "scope_digest",
+        "policy_version",
+        "workflow_id",
+        "stage_id",
+        "target_branch"
+      ]
+    },
+    {
+      "id": "record_decision",
+      "stage": "validate-approval"
+    },
+    {
+      "id": "new_demand",
+      "stage": "new-demand"
+    },
+    {
+      "id": "stopped",
+      "stage": "record-stop"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "validate"
+    },
+    {
+      "from": "validate",
+      "to": "investigate"
+    },
+    {
+      "from": "investigate",
+      "to": "impact"
+    },
+    {
+      "from": "impact",
+      "to": "recommend"
+    },
+    {
+      "from": "recommend",
+      "to": "decision"
+    },
+    {
+      "from": "decision",
+      "to": "record_decision",
+      "label": "[A] Authorize a new scoped demand"
+    },
+    {
+      "from": "decision",
+      "to": "investigate",
+      "label": "[R] Clarify"
+    },
+    {
+      "from": "decision",
+      "to": "stopped",
+      "label": "[S] Stop"
+    },
+    {
+      "from": "record_decision",
+      "to": "new_demand"
+    },
+    {
+      "from": "new_demand",
+      "to": "exit"
+    },
+    {
+      "from": "stopped",
+      "to": "exit"
+    }
+  ],
+  "demand_type": "discovery"
+}

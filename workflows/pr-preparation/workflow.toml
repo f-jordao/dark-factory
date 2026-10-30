@@ -1,0 +1,19 @@
+# Generated scaffold; all automatic and manual execution is disabled.
+_version = 1
+
+[workflow]
+name = "PR preparation & draft publication"
+description = "Describe the verified change and optionally publish a draft PR under explicit write policy."
+graph = "workflow.fabro"
+
+[run]
+goal = "Inspect the workflow scaffold; substantive stage content is pending."
+
+[run.environment]
+id = "dark-factory-local"
+
+[run.clone]
+enabled = false
+
+[run.run_branch]
+enabled = false

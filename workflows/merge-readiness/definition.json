@@ -1,0 +1,203 @@
+{
+  "_version": 1,
+  "id": "merge-readiness",
+  "status": "scaffold",
+  "enabled": false,
+  "limits": {
+    "max_repair_attempts": 2,
+    "max_stage_visits": 3,
+    "on_exhaustion": "human"
+  },
+  "nodes": [
+    {
+      "id": "snapshot",
+      "stage": "snapshot-pr"
+    },
+    {
+      "id": "preconditions",
+      "stage": "merge-preconditions"
+    },
+    {
+      "id": "specialist_required",
+      "stage": "specialist-required"
+    },
+    {
+      "id": "specialist",
+      "stage": "specialist-approval",
+      "roles": [
+        "relevant-specialist"
+      ],
+      "approval": true,
+      "record_fields": [
+        "actor",
+        "roles",
+        "demand_id",
+        "repository",
+        "head_sha",
+        "base_sha",
+        "artifact_digest",
+        "scope_digest",
+        "policy_version",
+        "workflow_id",
+        "stage_id",
+        "target_branch"
+      ]
+    },
+    {
+      "id": "record_specialist",
+      "stage": "validate-approval"
+    },
+    {
+      "id": "owner",
+      "stage": "owner-approval",
+      "roles": [
+        "code-owner"
+      ],
+      "approval": true,
+      "record_fields": [
+        "actor",
+        "roles",
+        "demand_id",
+        "repository",
+        "head_sha",
+        "base_sha",
+        "artifact_digest",
+        "scope_digest",
+        "policy_version",
+        "workflow_id",
+        "stage_id",
+        "target_branch"
+      ]
+    },
+    {
+      "id": "record_owner",
+      "stage": "validate-approval"
+    },
+    {
+      "id": "recheck",
+      "stage": "recheck-pr"
+    },
+    {
+      "id": "current",
+      "stage": "merge-preconditions"
+    },
+    {
+      "id": "handoff",
+      "stage": "record-merge-handoff"
+    },
+    {
+      "id": "wait",
+      "stage": "record-wait"
+    },
+    {
+      "id": "rework",
+      "stage": "dispatch",
+      "workflow": "rework"
+    },
+    {
+      "id": "stopped",
+      "stage": "record-stop"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "snapshot"
+    },
+    {
+      "from": "snapshot",
+      "to": "preconditions"
+    },
+    {
+      "from": "preconditions",
+      "to": "specialist_required",
+      "label": "Evidence ready",
+      "condition": "context.merge_evidence_ready=true"
+    },
+    {
+      "from": "preconditions",
+      "to": "wait",
+      "label": "Missing / failed / unresolved"
+    },
+    {
+      "from": "specialist_required",
+      "to": "owner",
+      "label": "Not required",
+      "condition": "context.specialist_required=false"
+    },
+    {
+      "from": "specialist_required",
+      "to": "specialist",
+      "label": "Required / unknown"
+    },
+    {
+      "from": "specialist",
+      "to": "record_specialist",
+      "label": "[A] Accept final revision"
+    },
+    {
+      "from": "specialist",
+      "to": "rework",
+      "label": "[R] Revise"
+    },
+    {
+      "from": "specialist",
+      "to": "stopped",
+      "label": "[S] Stop"
+    },
+    {
+      "from": "record_specialist",
+      "to": "owner"
+    },
+    {
+      "from": "owner",
+      "to": "record_owner",
+      "label": "[A] Approve final revision"
+    },
+    {
+      "from": "owner",
+      "to": "rework",
+      "label": "[R] Revise"
+    },
+    {
+      "from": "owner",
+      "to": "stopped",
+      "label": "[S] Stop"
+    },
+    {
+      "from": "record_owner",
+      "to": "recheck"
+    },
+    {
+      "from": "recheck",
+      "to": "current"
+    },
+    {
+      "from": "current",
+      "to": "handoff",
+      "label": "Current, green and approved",
+      "condition": "context.merge_ready=true"
+    },
+    {
+      "from": "current",
+      "to": "wait",
+      "label": "Changed / approvals stale"
+    },
+    {
+      "from": "handoff",
+      "to": "exit"
+    },
+    {
+      "from": "wait",
+      "to": "exit"
+    },
+    {
+      "from": "rework",
+      "to": "exit"
+    },
+    {
+      "from": "stopped",
+      "to": "exit"
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Demand envelope",
+  "properties": {
+    "demand_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[^/]+/[^/]+$"
+    },
+    "head_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "base_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "scope_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "policy_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_event": {
+      "type": "string",
+      "minLength": 1
+    },
+    "demand_type": {
+      "enum": [
+        "bug",
+        "feature",
+        "maintenance",
+        "security",
+        "incident",
+        "discovery"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blast_radius": {
+      "enum": [
+        "local",
+        "service",
+        "shared",
+        "system"
+      ]
+    },
+    "sensitive": {
+      "type": "boolean"
+    },
+    "incomplete_evidence": {
+      "type": "boolean"
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "target_branch": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "demand_id",
+    "repository",
+    "head_sha",
+    "base_sha",
+    "scope_digest",
+    "policy_version",
+    "source_event",
+    "demand_type",
+    "owner",
+    "blast_radius",
+    "sensitive",
+    "incomplete_evidence",
+    "acceptance_criteria",
+    "evidence",
+    "target_branch"
+  ]
+}

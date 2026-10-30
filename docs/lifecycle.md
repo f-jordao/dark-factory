@@ -1,7 +1,9 @@
 # Demand to merge
 
-This is the target architecture. The PR review controller is the implemented
-slice; demand classification and approval execution are future milestones.
+This is the target architecture. Its six demand routes and seven shared flows are
+now scaffolded in the [workflow catalog](workflows.md), with stage content pending.
+The PR review controller is the implemented slice; durable demand routing and
+trusted approval execution remain future milestones.
 
 ```mermaid
 flowchart LR

@@ -1,0 +1,23 @@
+// Generated from definition.json. Content and execution bindings are pending.
+// Human selections are not authenticated approval records by themselves.
+digraph Verification {
+    graph [default_fidelity="full", default_max_retries=0, max_node_visits=3, on_failure="exit"]
+    start [shape=Mdiamond, label="Start"]
+    scaffold_guard [shape=parallelogram, label="Content pending — execution blocked", script="printf '%s\\n' 'Workflow scaffold: stage content and trusted execution bindings are pending.'; exit 78", goal_gate=true, max_retries=0]
+    exit [shape=Msquare, label="End / governed handoff"]
+    checks [shape=parallelogram, label="Run configured verification scripts", script="printf '%s\\n' 'Workflow scaffold: stage content and trusted execution bindings are pending.'; exit 78", max_retries=0]
+    passed [shape=diamond, label="Verification passed?"]
+    save [shape=parallelogram, label="Persist verification evidence", script="printf '%s\\n' 'Workflow scaffold: stage content and trusted execution bindings are pending.'; exit 78", max_retries=0]
+    rework [shape=parallelogram, label="Hand off to shared workflow", script="printf '%s\\n' 'Workflow scaffold: stage content and trusted execution bindings are pending.'; exit 78", max_retries=0]
+    start -> scaffold_guard
+    scaffold_guard -> exit [label="Content pending"]
+    scaffold_guard -> checks [condition="outcome=succeeded"]
+    checks -> passed [condition="outcome=succeeded"]
+    passed -> save [label="Passed", condition="context.verification_passed=true"]
+    passed -> rework [label="Failed / missing checks"]
+    save -> exit [condition="outcome=succeeded"]
+    rework -> exit [condition="outcome=succeeded"]
+    checks -> exit [label="Failed / unanswered"]
+    save -> exit [label="Failed / unanswered"]
+    rework -> exit [label="Failed / unanswered"]
+}

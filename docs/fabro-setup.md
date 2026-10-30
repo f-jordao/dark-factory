@@ -36,7 +36,8 @@ No GitHub App registration is required for this local dev-token sign-in.
 
 - **Runs → PRReview → Graph Source** shows the actual submitted review graph.
 - **Settings → WORKFLOWS** contains variables and secrets settings.
-- **Automations** is empty because no recurring trigger is installed.
+- **Automations** can display the 13 lifecycle scaffolds after registration.
+  Their API triggers are disabled and no recurring trigger is installed.
 - Kiro does not appear in **Models** or **Integrations**. Fabro's generic ACP
   backend launches Kiro through our adapter; the CLI owns its authentication
   and model selection.
@@ -47,6 +48,8 @@ run-list endpoints to `not_implemented` in real mode. This source inspection
 does not validate that prerelease as a working replacement for our runtime.
 An upgrade alone is therefore not a verified solution for a workflow catalog.
 The lifecycle diagram is a design; only the review worker graph has been run.
+See [workflow setup](workflows.md) for the complete scaffold catalog and its
+disabled registration command.
 
 ```bash
 python3 scripts/local_fabro.py stop

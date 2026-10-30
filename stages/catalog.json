@@ -1,0 +1,1076 @@
+{
+  "_version": 1,
+  "stages": {
+    "capture-demand": {
+      "name": "Capture demand",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "source_event"
+      ],
+      "outputs": [
+        "demand_record"
+      ],
+      "implementation": null
+    },
+    "classify-demand": {
+      "name": "Normalize demand type",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "demand_record",
+        "trusted_type"
+      ],
+      "outputs": [
+        "classified_demand"
+      ],
+      "implementation": null
+    },
+    "classification-known": {
+      "name": "Demand type known?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "classified_demand"
+      ],
+      "outputs": [
+        "routing_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "classify-human": {
+      "name": "Choose demand type",
+      "executor": "human",
+      "content_status": "pending",
+      "inputs": [
+        "demand_record"
+      ],
+      "outputs": [
+        "classification_decision"
+      ],
+      "decision_packet": null,
+      "trusted_decision_validator": null
+    },
+    "record-classification": {
+      "name": "Record chosen demand type",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "classification_decision"
+      ],
+      "outputs": [
+        "classified_demand"
+      ],
+      "implementation": null
+    },
+    "collect-evidence": {
+      "name": "Collect blast-radius evidence",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "demand_record",
+        "repository_snapshot"
+      ],
+      "outputs": [
+        "impact_evidence"
+      ],
+      "implementation": null
+    },
+    "apply-policy": {
+      "name": "Apply deterministic routing policy",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "impact_evidence",
+        "policy_version"
+      ],
+      "outputs": [
+        "risk_assessment"
+      ],
+      "implementation": null
+    },
+    "choose-route": {
+      "name": "Select demand route",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "classified_demand",
+        "risk_assessment"
+      ],
+      "outputs": [
+        "routing_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "dispatch": {
+      "name": "Hand off to shared workflow",
+      "executor": "handoff",
+      "content_status": "pending",
+      "inputs": [
+        "demand_record",
+        "current_revision",
+        "stage_result"
+      ],
+      "outputs": [
+        "handoff_record"
+      ],
+      "dispatch_binding": null
+    },
+    "validate-demand": {
+      "name": "Validate demand and immutable inputs",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "demand_record",
+        "source_revision"
+      ],
+      "outputs": [
+        "validated_demand"
+      ],
+      "implementation": null
+    },
+    "scope-known": {
+      "name": "Expected behavior and scope clear?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand"
+      ],
+      "outputs": [
+        "scope_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "scope-approval": {
+      "name": "Confirm scope and acceptance",
+      "executor": "human",
+      "content_status": "pending",
+      "inputs": [
+        "demand_record",
+        "scope_digest",
+        "acceptance_criteria"
+      ],
+      "outputs": [
+        "approval_record"
+      ],
+      "decision_packet": null,
+      "trusted_decision_validator": null
+    },
+    "plan-required": {
+      "name": "Plan approval required?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "risk_assessment"
+      ],
+      "outputs": [
+        "gate_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "plan-approval": {
+      "name": "Approve approach and plan",
+      "executor": "human",
+      "content_status": "pending",
+      "inputs": [
+        "plan",
+        "impact_evidence",
+        "current_revision"
+      ],
+      "outputs": [
+        "approval_record"
+      ],
+      "decision_packet": null,
+      "trusted_decision_validator": null
+    },
+    "validate-approval": {
+      "name": "Validate and record human decision",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "approval_record",
+        "required_roles",
+        "current_revision",
+        "scope_digest"
+      ],
+      "outputs": [
+        "validated_approval"
+      ],
+      "implementation": null
+    },
+    "request-clarification": {
+      "name": "Record clarification needed",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "human_decision",
+        "demand_record"
+      ],
+      "outputs": [
+        "waiting_record"
+      ],
+      "implementation": null
+    },
+    "record-stop": {
+      "name": "Record stopped demand",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "human_decision",
+        "demand_record"
+      ],
+      "outputs": [
+        "terminal_record"
+      ],
+      "implementation": null
+    },
+    "reproduce": {
+      "name": "Reproduce reported failure",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand",
+        "repository_snapshot"
+      ],
+      "outputs": [
+        "reproduction_evidence"
+      ],
+      "prompt": "stages/reproduce/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "diagnosing-bugs",
+      "skill_installed": false
+    },
+    "diagnose": {
+      "name": "Diagnose root cause",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "reproduction_evidence",
+        "repository_snapshot"
+      ],
+      "outputs": [
+        "diagnosis"
+      ],
+      "prompt": "stages/diagnose/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "diagnosing-bugs",
+      "skill_installed": false
+    },
+    "regression-design": {
+      "name": "Design regression evidence",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "diagnosis",
+        "acceptance_criteria"
+      ],
+      "outputs": [
+        "regression_plan"
+      ],
+      "prompt": "stages/regression-design/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "diagnosing-bugs",
+      "skill_installed": false
+    },
+    "clarify": {
+      "name": "Clarify requested behavior",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand",
+        "repository_snapshot"
+      ],
+      "outputs": [
+        "scope_proposal"
+      ],
+      "prompt": "stages/clarify/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "grill-with-docs",
+      "skill_installed": false
+    },
+    "specify": {
+      "name": "Write acceptance specification",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "validated_approval",
+        "scope_proposal"
+      ],
+      "outputs": [
+        "specification"
+      ],
+      "prompt": "stages/specify/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "to-spec",
+      "skill_installed": false
+    },
+    "plan": {
+      "name": "Plan bounded implementation",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand",
+        "specification",
+        "impact_evidence"
+      ],
+      "outputs": [
+        "plan"
+      ],
+      "prompt": "stages/plan/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "to-tickets",
+      "skill_installed": false
+    },
+    "compatibility": {
+      "name": "Inspect compatibility and consumers",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand",
+        "repository_snapshot"
+      ],
+      "outputs": [
+        "compatibility_evidence"
+      ],
+      "prompt": "stages/compatibility/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": null,
+      "skill_installed": false
+    },
+    "threat-assessment": {
+      "name": "Assess threat and exposure",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand",
+        "restricted_evidence"
+      ],
+      "outputs": [
+        "threat_assessment"
+      ],
+      "prompt": "stages/threat-assessment/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": null,
+      "skill_installed": false
+    },
+    "incident-triage": {
+      "name": "Diagnose incident",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand",
+        "operational_evidence"
+      ],
+      "outputs": [
+        "incident_assessment"
+      ],
+      "prompt": "stages/incident-triage/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "diagnosing-bugs",
+      "skill_installed": false
+    },
+    "containment-proposal": {
+      "name": "Propose containment and rollback",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "incident_assessment",
+        "operational_constraints"
+      ],
+      "outputs": [
+        "containment_proposal"
+      ],
+      "prompt": "stages/containment-proposal/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": null,
+      "skill_installed": false
+    },
+    "operational-approval": {
+      "name": "Authorize operational scope",
+      "executor": "human",
+      "content_status": "pending",
+      "inputs": [
+        "containment_proposal",
+        "operational_constraints"
+      ],
+      "outputs": [
+        "approval_record"
+      ],
+      "decision_packet": null,
+      "trusted_decision_validator": null
+    },
+    "implement": {
+      "name": "Implement approved change",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand",
+        "plan",
+        "validated_approval",
+        "repository_snapshot"
+      ],
+      "outputs": [
+        "change_revision"
+      ],
+      "prompt": "stages/implement/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "implement",
+      "skill_installed": false
+    },
+    "verification-result": {
+      "name": "Verification passed?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "verification_evidence"
+      ],
+      "outputs": [
+        "verification_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "scope-current": {
+      "name": "Actual diff within approved scope?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "risk_assessment",
+        "validated_approval",
+        "change_revision"
+      ],
+      "outputs": [
+        "scope_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "review-clear": {
+      "name": "Independent review clear?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "review_result",
+        "change_revision"
+      ],
+      "outputs": [
+        "review_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "investigate": {
+      "name": "Investigate without changing code",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand",
+        "repository_snapshot"
+      ],
+      "outputs": [
+        "investigation_evidence"
+      ],
+      "prompt": "stages/investigate/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": null,
+      "skill_installed": false
+    },
+    "analyze-impact": {
+      "name": "Explain reach and uncertainty",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "impact_evidence",
+        "repository_snapshot"
+      ],
+      "outputs": [
+        "impact_analysis"
+      ],
+      "prompt": "stages/analyze-impact/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": null,
+      "skill_installed": false
+    },
+    "recommend": {
+      "name": "Produce findings and alternatives",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "investigation_evidence",
+        "impact_analysis"
+      ],
+      "outputs": [
+        "recommendation"
+      ],
+      "prompt": "stages/recommend/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": null,
+      "skill_installed": false
+    },
+    "discovery-decision": {
+      "name": "Authorize new demand, clarify or stop",
+      "executor": "human",
+      "content_status": "pending",
+      "inputs": [
+        "recommendation",
+        "scope_digest",
+        "current_revision"
+      ],
+      "outputs": [
+        "discovery_decision"
+      ],
+      "decision_packet": null,
+      "trusted_decision_validator": null
+    },
+    "new-demand": {
+      "name": "Create a separate scoped demand",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "validated_approval",
+        "recommendation"
+      ],
+      "outputs": [
+        "new_demand_record"
+      ],
+      "implementation": null
+    },
+    "run-checks": {
+      "name": "Run configured verification scripts",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "change_revision",
+        "verification_plan"
+      ],
+      "outputs": [
+        "verification_evidence"
+      ],
+      "implementation": null,
+      "execution_boundary": "isolated-verification-worker"
+    },
+    "save-evidence": {
+      "name": "Persist verification evidence",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "verification_evidence",
+        "current_revision"
+      ],
+      "outputs": [
+        "evidence_record"
+      ],
+      "implementation": null
+    },
+    "collect-diff": {
+      "name": "Collect exact implementation diff",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "head_sha",
+        "base_sha",
+        "repository_snapshot"
+      ],
+      "outputs": [
+        "diff_evidence"
+      ],
+      "implementation": null
+    },
+    "invalidate-approval": {
+      "name": "Invalidate approvals for changed scope",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "diff_evidence",
+        "scope_digest",
+        "approval_record"
+      ],
+      "outputs": [
+        "invalidated_approval"
+      ],
+      "implementation": null
+    },
+    "save-assessment": {
+      "name": "Persist actual-diff assessment",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "diff_evidence",
+        "risk_assessment",
+        "current_revision"
+      ],
+      "outputs": [
+        "assessment_record"
+      ],
+      "implementation": null
+    },
+    "receive-event": {
+      "name": "Receive event or scheduled scan",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "source_event"
+      ],
+      "outputs": [
+        "event_record"
+      ],
+      "implementation": null
+    },
+    "snapshot-pr": {
+      "name": "Read PR, checks and current revision",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "repository",
+        "pr_number"
+      ],
+      "outputs": [
+        "pr_snapshot"
+      ],
+      "implementation": null
+    },
+    "pr-terminal": {
+      "name": "PR merged or closed?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "pr_snapshot"
+      ],
+      "outputs": [
+        "terminal_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "record-terminal": {
+      "name": "Stop monitoring closed PR",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "pr_snapshot"
+      ],
+      "outputs": [
+        "terminal_record"
+      ],
+      "implementation": null
+    },
+    "review-eligible": {
+      "name": "Ready, green and eligible?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "pr_snapshot",
+        "required_checks"
+      ],
+      "outputs": [
+        "eligibility_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "claim-review": {
+      "name": "Claim exact review identity",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "pr_snapshot",
+        "policy_digest",
+        "review_store"
+      ],
+      "outputs": [
+        "claim_record"
+      ],
+      "implementation": null
+    },
+    "new-work": {
+      "name": "New claimed revision?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "claim_record"
+      ],
+      "outputs": [
+        "deduplication_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "build-packet": {
+      "name": "Build immutable review packet",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "pr_snapshot",
+        "repository_standards"
+      ],
+      "outputs": [
+        "review_packet"
+      ],
+      "implementation": null
+    },
+    "revision-current": {
+      "name": "Revision and eligibility still current?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "review_packet",
+        "pr_snapshot"
+      ],
+      "outputs": [
+        "revision_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "independent-review": {
+      "name": "Review exact diff independently",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "review_packet"
+      ],
+      "outputs": [
+        "review_result"
+      ],
+      "prompt": "stages/independent-review/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "code-review",
+      "skill_installed": false
+    },
+    "validate-review": {
+      "name": "Validate structured findings",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "review_result",
+        "review_packet"
+      ],
+      "outputs": [
+        "validated_review"
+      ],
+      "implementation": null
+    },
+    "save-review": {
+      "name": "Save review before publication",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "validated_review",
+        "review_identity"
+      ],
+      "outputs": [
+        "saved_review"
+      ],
+      "implementation": null
+    },
+    "publication-enabled": {
+      "name": "COMMENT publication enabled?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "publication_policy",
+        "saved_review"
+      ],
+      "outputs": [
+        "publication_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "recheck-pr": {
+      "name": "Recheck exact head, base and checks",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "review_identity",
+        "pr_snapshot"
+      ],
+      "outputs": [
+        "current_snapshot"
+      ],
+      "implementation": null
+    },
+    "publish-comment": {
+      "name": "Publish validated COMMENT once",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "saved_review",
+        "current_snapshot",
+        "publication_identity"
+      ],
+      "outputs": [
+        "publication_record"
+      ],
+      "implementation": null
+    },
+    "record-wait": {
+      "name": "Record waiting or unchanged state",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "pr_snapshot",
+        "stage_result"
+      ],
+      "outputs": [
+        "waiting_record"
+      ],
+      "implementation": null
+    },
+    "merge-preconditions": {
+      "name": "Required merge evidence available?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "pr_snapshot",
+        "verification_evidence",
+        "review_result"
+      ],
+      "outputs": [
+        "merge_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "specialist-required": {
+      "name": "Specialist acceptance required?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "risk_assessment"
+      ],
+      "outputs": [
+        "gate_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "specialist-approval": {
+      "name": "Specialist accepts final revision",
+      "executor": "human",
+      "content_status": "pending",
+      "inputs": [
+        "diff_evidence",
+        "verification_evidence",
+        "review_result"
+      ],
+      "outputs": [
+        "approval_record"
+      ],
+      "decision_packet": null,
+      "trusted_decision_validator": null
+    },
+    "owner-approval": {
+      "name": "Code owner approves final revision",
+      "executor": "human",
+      "content_status": "pending",
+      "inputs": [
+        "diff_evidence",
+        "verification_evidence",
+        "review_result"
+      ],
+      "outputs": [
+        "approval_record"
+      ],
+      "decision_packet": null,
+      "trusted_decision_validator": null
+    },
+    "record-merge-handoff": {
+      "name": "Record handoff to governed GitHub merge",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "current_snapshot",
+        "validated_approval"
+      ],
+      "outputs": [
+        "merge_handoff"
+      ],
+      "implementation": null
+    },
+    "failure-context": {
+      "name": "Collect failure and revision context",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "failure_record",
+        "current_revision"
+      ],
+      "outputs": [
+        "repair_packet"
+      ],
+      "implementation": null
+    },
+    "repair-budget": {
+      "name": "Read bounded repair budget",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "repair_packet",
+        "attempt_count"
+      ],
+      "outputs": [
+        "budget_record"
+      ],
+      "implementation": null
+    },
+    "budget-remaining": {
+      "name": "Repair budget remaining?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "budget_record"
+      ],
+      "outputs": [
+        "budget_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "repair": {
+      "name": "Repair within approved scope",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "repair_packet",
+        "plan",
+        "validated_approval"
+      ],
+      "outputs": [
+        "change_revision"
+      ],
+      "prompt": "stages/repair/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "implement",
+      "skill_installed": false
+    },
+    "count-attempt": {
+      "name": "Persist completed repair attempt",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "change_revision",
+        "attempt_count"
+      ],
+      "outputs": [
+        "budget_record"
+      ],
+      "implementation": null
+    },
+    "repair-escalation": {
+      "name": "Human decides after repair limit",
+      "executor": "human",
+      "content_status": "pending",
+      "inputs": [
+        "failure_record",
+        "budget_record"
+      ],
+      "outputs": [
+        "escalation_decision"
+      ],
+      "decision_packet": null,
+      "trusted_decision_validator": null
+    },
+    "prepare-workspace": {
+      "name": "Prepare isolated branch and workspace",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "validated_demand",
+        "base_sha",
+        "authorized_scope"
+      ],
+      "outputs": [
+        "workspace_record"
+      ],
+      "implementation": null
+    },
+    "prepare-pr": {
+      "name": "Prepare PR description and evidence",
+      "executor": "agent",
+      "content_status": "pending",
+      "inputs": [
+        "change_revision",
+        "validated_scope",
+        "verification_evidence",
+        "impact_assessment"
+      ],
+      "outputs": [
+        "pr_proposal"
+      ],
+      "prompt": "stages/prepare-pr/prompt.md",
+      "worker_binding": null,
+      "skill_candidate": "pr",
+      "skill_installed": false
+    },
+    "validate-pr-proposal": {
+      "name": "Validate PR proposal and exact branch",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "pr_proposal",
+        "change_revision",
+        "approved_scope"
+      ],
+      "outputs": [
+        "validated_pr_proposal"
+      ],
+      "implementation": null
+    },
+    "pr-publication-allowed": {
+      "name": "Draft PR publication explicitly enabled?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "publication_policy",
+        "validated_pr_proposal",
+        "current_revision"
+      ],
+      "outputs": [
+        "publication_decision"
+      ],
+      "trusted_context_binding": null
+    },
+    "open-draft-pr": {
+      "name": "Open draft PR once",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "validated_pr_proposal",
+        "current_revision",
+        "publication_identity"
+      ],
+      "outputs": [
+        "pr_record"
+      ],
+      "implementation": null,
+      "publication_mode": "draft"
+    },
+    "save-pr-proposal": {
+      "name": "Save PR proposal without publication",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "validated_pr_proposal"
+      ],
+      "outputs": [
+        "pr_proposal_record"
+      ],
+      "implementation": null
+    },
+    "save-pr-identity": {
+      "name": "Persist PR identity and revision",
+      "executor": "script",
+      "content_status": "pending",
+      "inputs": [
+        "pr_record",
+        "current_revision"
+      ],
+      "outputs": [
+        "pr_identity"
+      ],
+      "implementation": null
+    },
+    "pr-available": {
+      "name": "PR exists and is ready for lifecycle tracking?",
+      "executor": "condition",
+      "content_status": "pending",
+      "inputs": [
+        "pr_identity"
+      ],
+      "outputs": [
+        "pr_handoff_decision"
+      ],
+      "trusted_context_binding": null
+    }
+  }
+}

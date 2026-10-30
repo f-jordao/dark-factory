@@ -51,6 +51,18 @@ def parser():
     )
     commands = root.add_subparsers(dest="operation", required=True)
     commands.add_parser("demo", help="Run the offline lifecycle demo; no GitHub or LLM calls")
+    workflows = commands.add_parser("workflows", help="Inspect the disabled lifecycle scaffolds")
+    workflows.add_argument("--project", default=str(Path(__file__).resolve().parent.parent))
+    workflow_commands = workflows.add_subparsers(dest="workflow_action", required=True)
+    for action in ("list", "validate", "build"):
+        workflow_commands.add_parser(action)
+    show = workflow_commands.add_parser("show")
+    show.add_argument("workflow")
+    route = workflow_commands.add_parser("route")
+    route.add_argument("--demand", required=True)
+    route.add_argument("--blast-radius", default="local", choices=("local", "service", "shared", "system"))
+    route.add_argument("--sensitive", action="store_true")
+    route.add_argument("--incomplete-evidence", action="store_true")
     pilot = commands.add_parser("pilot", help="Inspect or review an offline fixture with the real worker")
     pilot.add_argument("--fixture", choices=("known-bug", "clean"), required=True)
     pilot.add_argument("--execute", action="store_true", help="Permit the real review worker")
@@ -82,6 +94,24 @@ def main(argv=None):
     try:
         if args.operation == "demo":
             print(json.dumps(run_demo(), indent=2))
+            return 0
+        if args.operation == "workflows":
+            from .workflows import build_catalog, load_catalog, select_route, validate_catalog
+            if args.workflow_action in ("list", "validate"):
+                result = validate_catalog(args.project)
+            elif args.workflow_action == "build":
+                result = build_catalog(args.project)
+            elif args.workflow_action == "show":
+                _, _, definitions = load_catalog(args.project)
+                if args.workflow not in definitions:
+                    raise ValueError("Unknown workflow: " + args.workflow)
+                result = definitions[args.workflow]
+            else:
+                result = select_route(
+                    args.project, args.demand, args.blast_radius,
+                    args.sensitive, args.incomplete_evidence,
+                )
+            print(json.dumps(result, indent=2))
             return 0
         state = State(args.state)
         if args.operation == "status":

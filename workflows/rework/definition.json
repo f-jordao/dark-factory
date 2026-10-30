@@ -1,0 +1,165 @@
+{
+  "_version": 1,
+  "id": "rework",
+  "status": "scaffold",
+  "enabled": false,
+  "limits": {
+    "max_repair_attempts": 2,
+    "max_stage_visits": 3,
+    "on_exhaustion": "human"
+  },
+  "nodes": [
+    {
+      "id": "context",
+      "stage": "failure-context"
+    },
+    {
+      "id": "budget",
+      "stage": "repair-budget"
+    },
+    {
+      "id": "remaining",
+      "stage": "budget-remaining"
+    },
+    {
+      "id": "repair",
+      "stage": "repair",
+      "max_visits": 2
+    },
+    {
+      "id": "count",
+      "stage": "count-attempt"
+    },
+    {
+      "id": "verify",
+      "stage": "dispatch",
+      "workflow": "verification"
+    },
+    {
+      "id": "passed",
+      "stage": "verification-result"
+    },
+    {
+      "id": "reassess",
+      "stage": "dispatch",
+      "workflow": "diff-reassessment"
+    },
+    {
+      "id": "review",
+      "stage": "dispatch",
+      "workflow": "pr-review-lifecycle"
+    },
+    {
+      "id": "escalate",
+      "stage": "repair-escalation",
+      "roles": [
+        "service-owner"
+      ],
+      "approval": true,
+      "record_fields": [
+        "actor",
+        "roles",
+        "demand_id",
+        "repository",
+        "head_sha",
+        "base_sha",
+        "artifact_digest",
+        "scope_digest",
+        "policy_version",
+        "workflow_id",
+        "stage_id",
+        "target_branch"
+      ]
+    },
+    {
+      "id": "record",
+      "stage": "validate-approval"
+    },
+    {
+      "id": "new_demand",
+      "stage": "new-demand"
+    },
+    {
+      "id": "stopped",
+      "stage": "record-stop"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "context"
+    },
+    {
+      "from": "context",
+      "to": "budget"
+    },
+    {
+      "from": "budget",
+      "to": "remaining"
+    },
+    {
+      "from": "remaining",
+      "to": "repair",
+      "label": "Budget available",
+      "condition": "context.repair_budget_remaining=true"
+    },
+    {
+      "from": "remaining",
+      "to": "escalate",
+      "label": "Exhausted / unknown"
+    },
+    {
+      "from": "repair",
+      "to": "count"
+    },
+    {
+      "from": "count",
+      "to": "verify"
+    },
+    {
+      "from": "verify",
+      "to": "passed"
+    },
+    {
+      "from": "passed",
+      "to": "reassess",
+      "label": "Passed",
+      "condition": "context.verification_passed=true"
+    },
+    {
+      "from": "passed",
+      "to": "budget",
+      "label": "Failed / missing evidence"
+    },
+    {
+      "from": "reassess",
+      "to": "review"
+    },
+    {
+      "from": "review",
+      "to": "exit"
+    },
+    {
+      "from": "escalate",
+      "to": "record",
+      "label": "[A] Authorize a separate scoped demand"
+    },
+    {
+      "from": "escalate",
+      "to": "stopped",
+      "label": "[S] Stop"
+    },
+    {
+      "from": "record",
+      "to": "new_demand"
+    },
+    {
+      "from": "new_demand",
+      "to": "exit"
+    },
+    {
+      "from": "stopped",
+      "to": "exit"
+    }
+  ]
+}

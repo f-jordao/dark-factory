@@ -1,0 +1,59 @@
+{
+  "_version": 1,
+  "policy_version": "lifecycle-scaffold-v1",
+  "routes": {
+    "bug": "bug-fix",
+    "feature": "feature-delivery",
+    "maintenance": "maintenance",
+    "security": "security-remediation",
+    "incident": "incident-response",
+    "discovery": "discovery"
+  },
+  "aliases": {
+    "exploration": "discovery",
+    "investigation": "discovery"
+  },
+  "precedence": [
+    "Discovery ends in a decision, never a code change.",
+    "R3: security, incident, sensitive controls or multiple services.",
+    "R2: feature, incomplete evidence, one service or shared dependency/API.",
+    "R1: complete evidence and one local component."
+  ],
+  "classes": {
+    "Discovery": {
+      "human_gates": [
+        "authorize-new-demand-or-clarify-or-stop"
+      ]
+    },
+    "R1": {
+      "human_gates": [
+        "clarify-if-ambiguous",
+        "code-owner-final-revision"
+      ]
+    },
+    "R2": {
+      "human_gates": [
+        "scope-and-acceptance",
+        "approve-plan",
+        "code-owner-final-revision"
+      ]
+    },
+    "R3": {
+      "human_gates": [
+        "scope-and-plan-owner-and-specialist",
+        "specialist-final-acceptance",
+        "code-owner-final-revision"
+      ]
+    }
+  },
+  "r0_status": "Reserved for a later explicit trivial-change allowlist; no approval bypass is configured.",
+  "approval_invalidation": [
+    "head_sha",
+    "base_sha",
+    "artifact_digest",
+    "scope_digest",
+    "policy_version"
+  ],
+  "merge_executor": "GitHub governed human merge",
+  "automatic_merge": false
+}

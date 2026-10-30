@@ -1,0 +1,19 @@
+# Generated scaffold; all automatic and manual execution is disabled.
+_version = 1
+
+[workflow]
+name = "Verification"
+description = "Run configured checks and persist evidence for the exact revision."
+graph = "workflow.fabro"
+
+[run]
+goal = "Inspect the workflow scaffold; substantive stage content is pending."
+
+[run.environment]
+id = "dark-factory-local"
+
+[run.clone]
+enabled = false
+
+[run.run_branch]
+enabled = false

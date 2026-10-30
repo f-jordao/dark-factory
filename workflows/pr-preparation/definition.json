@@ -1,0 +1,74 @@
+{
+  "_version": 1,
+  "id": "pr-preparation",
+  "status": "scaffold",
+  "enabled": false,
+  "limits": {
+    "max_repair_attempts": 2,
+    "max_stage_visits": 3,
+    "on_exhaustion": "human"
+  },
+  "nodes": [
+    {
+      "id": "describe",
+      "stage": "prepare-pr"
+    },
+    {
+      "id": "validate",
+      "stage": "validate-pr-proposal"
+    },
+    {
+      "id": "enabled",
+      "stage": "pr-publication-allowed"
+    },
+    {
+      "id": "publish",
+      "stage": "open-draft-pr"
+    },
+    {
+      "id": "record",
+      "stage": "save-pr-identity"
+    },
+    {
+      "id": "save",
+      "stage": "save-pr-proposal"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "describe"
+    },
+    {
+      "from": "describe",
+      "to": "validate"
+    },
+    {
+      "from": "validate",
+      "to": "enabled"
+    },
+    {
+      "from": "enabled",
+      "to": "publish",
+      "label": "Authorized and current",
+      "condition": "context.pr_publication_enabled=true && context.revision_current=true"
+    },
+    {
+      "from": "enabled",
+      "to": "save",
+      "label": "Save proposal only"
+    },
+    {
+      "from": "publish",
+      "to": "record"
+    },
+    {
+      "from": "record",
+      "to": "exit"
+    },
+    {
+      "from": "save",
+      "to": "exit"
+    }
+  ]
+}

@@ -3,6 +3,11 @@
 An agentic software lifecycle whose control flow runs through deterministic code.
 Agents are workers at explicit stages, not schedulers or polling loops.
 
+**All lifecycle routes are scaffolded.** Six demand routes and seven shared flows
+now define the stages, conditions, human decisions and handoffs. Their content
+and execution bindings remain pending. See the [workflow setup](docs/workflows.md)
+and its visual maps.
+
 **First working slice: the PR review lifecycle.** A Python controller inspects
 GitHub, waits for configured checks, claims each eligible revision, invokes one
 review worker, validates its findings, and publishes a COMMENT review when
@@ -84,9 +89,10 @@ The separate demand-to-merge diagram is an illustrative lifecycle design.
 
 Find the executed workflow under **Runs → PRReview → Graph Source**.
 The **WORKFLOWS** heading in Settings groups variables and secrets.
-The installed Fabro 0.254.0 server does not implement the workflow-listing API,
-and no automation has been installed. The native UI is currently a view of
-worker execution, not a catalog of the complete lifecycle.
+The installed Fabro 0.254.0 server does not implement the workflow-listing API.
+The **Automations** page can display the 13 lifecycle definitions with disabled
+triggers. They are scaffolds awaiting content; no schedule or operational
+automation is enabled.
 
 The second identical invocation reports `review_invocations: 0`. Results are in
 `.dark-factory/runs/<review-key>/output.json`, with Fabro exports and run identity
@@ -164,6 +170,14 @@ should receive only its review packet, with no controller publication credential
 The full lifecycle is documented in [Demand to merge](docs/lifecycle.md):
 intake → demand type → blast-radius evidence → human gates → implementation
 → verification → review → merge eligibility.
+
+Inspect the full structure without starting workers:
+
+```bash
+python3 -m dark_factory workflows list
+python3 -m dark_factory workflows show feature-delivery
+python3 -m dark_factory workflows route --demand bug --blast-radius shared
+```
 
 The review prompt keeps Matt Pocock's **Standards** and **Spec** axes separate.
 It is a project-authored adaptation, not his installed skill.

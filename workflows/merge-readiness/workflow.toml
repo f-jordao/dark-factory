@@ -1,0 +1,19 @@
+# Generated scaffold; all automatic and manual execution is disabled.
+_version = 1
+
+[workflow]
+name = "Final approvals & merge readiness"
+description = "Obtain revision-bound acceptance and hand off to governed GitHub merge; no merge action."
+graph = "workflow.fabro"
+
+[run]
+goal = "Inspect the workflow scaffold; substantive stage content is pending."
+
+[run.environment]
+id = "dark-factory-local"
+
+[run.clone]
+enabled = false
+
+[run.run_branch]
+enabled = false

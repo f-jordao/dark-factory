@@ -22,6 +22,11 @@ No upstream skills are installed or vendored yet. Before importing them, pin
 the source revision, preserve its license, configure its tracker references and
 document any adaptations.
 
+The [shared stage catalog](../stages/catalog.json) records candidate methods.
+The 17 agent-stage prompt files under `stages/` have empty Method, Input and
+Output sections. They are separate from the existing working PR-review prompt.
+Adding content alone does not enable the new workflow scaffolds.
+
 Skills that ask for scope decisions, seam approval or approval before publishing
 must retain those interaction points when orchestrated. A background worker
 should emit a structured request for a human decision and pause.

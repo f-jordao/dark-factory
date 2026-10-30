@@ -1,54 +1,59 @@
 # Next milestones
 
-## 0. Resolve the lifecycle UI gap
+## 1. Workflow structure — complete
 
-Fabro's authenticated run UI works, but the installed stable server's workflow
-catalog returns HTTP 501. Inspection of `v0.400.0-nightly.0` finds the same
-unimplemented real-mode catalog routes. An upgrade has not been validated
-as a fix. Kiro is connected through generic ACP, not a named settings integration.
+Six demand routes and seven shared flows now define the full lifecycle.
+They include demand classification, blast-radius routing, human gates, isolated
+implementation, verification, PR preparation, review, final acceptance and a
+governed GitHub merge handoff. Discovery ends in a human decision.
 
-- Decide the lifecycle control surface before expanding worker flows. A small
-  Dark Factory console could show registered flows, deterministic PR readiness,
-  saved results and human decisions, with links to Fabro worker runs.
-- Show which stages are implemented and which are design-only.
-- Keep readiness checks, scheduling and status refresh free of model calls.
-- Complete the PR review path before adding feature implementation workflows.
+The scaffold has 77 stage templates, 17 empty agent prompts, input/output slots,
+record schemas and bounded rework. All 13 generated Fabro graphs validate.
+Scaffolds block before any agent stage and remain disabled.
+See [workflow setup](docs/workflows.md) for maps and content locations.
 
-## 1. Finish the GitHub PR pilot
+Fabro's native workflow catalog is unimplemented. Its Automations page can hold
+disabled definitions without adding a schedule. Kiro remains a generic ACP
+worker with a project adapter, not a named Fabro settings integration.
 
-Completed: project-local Fabro runtime, native Kiro ACP with existing login,
-known-defect and clean fixture reviews, validated JSON output, duplicate
-suppression, permission denial, cancellation check, runtime restart and the
-authenticated Fabro web UI.
+## 2. Fill stage content
 
-- Resolve the GitHub-hosted CI account blocker or supply a configured runner.
-- Review a real controlled PR after its required checks are green.
-- Inspect its findings, then exercise COMMENT publication and recovery.
-- Verify native Kiro cancellation under the actual managed launcher.
+- Select and pin the relevant Matt Pocock skills; preserve license and required
+  human decisions.
+- Fill substantive agent methods, input packets and result contracts.
+- Add deterministic script implementations and trusted context bindings.
+- Add human decision packets, role requirements and approval validators.
+- Bind each agent stage to an appropriate worker profile and isolated environment.
+- Wire shared flow handoffs and result/resumption handling.
 
-## 2. Connect GitHub events and durable scheduling
+Prompt content alone does not enable a workflow. Keep the guards and triggers
+disabled until the route's execution and recovery behavior is exercised.
 
-- A deterministic dispatcher handles PR readiness, new commits, completed checks
-  and closure events; an external scheduler runs reconciliation for recovery.
-- Use a persistent worker store; GitHub-hosted runner disks are not durable.
-- Validate webhook signatures and allowlist repositories.
-- Keep unchanged, ineligible and terminal states quiet.
-- Add rate-limit handling, metrics and alerting without using agents.
+## 3. Implement durable lifecycle state and human gates
 
-## 3. Make demand routing and human gates executable
+- Persist demand identity, category, evidence, risk and current revision.
+- Record approver identity, roles, workflow/stage, branch, artifact and scope.
+- Invalidate approvals when revision, scope or policy changes.
+- Enforce repair budgets and human escalation.
+- Keep merge authority in GitHub rulesets and human decisions.
 
-- Represent bugs, features, maintenance, security, incidents and discovery.
-- Record blast-radius evidence separately from the demand category.
-- Route sensitive or incomplete cases to humans.
-- Persist approval identity, scope and revision; invalidate approval on changes.
-- Map approved stages to selected Matt Pocock skills and Fabro workers.
+## 4. Finish the real GitHub PR pilot
 
-## 4. Enforce merge readiness and broaden review context
+The existing PR-review controller and authenticated Kiro worker are exercised
+with local fixtures. Hosted CI cannot start because GitHub reports an account
+billing or spending-limit issue.
 
-- Configure GitHub rulesets, required checks and code-owner reviews.
-- Resolve linked requirements and standards at immutable revisions.
-- Provide workers with read-only repository snapshots and no publication credential.
-- Show demand-routing state and human decisions alongside Fabro's worker UI.
-- Add implementation and verification flows after the review slice is validated.
+- Resolve that account blocker or supply a configured runner.
+- Review a controlled PR after its required checks are green.
+- Inspect findings, then exercise COMMENT publication and recovery.
+- Verify cancellation under the actual managed Kiro launcher.
 
-Automatic merge is outside the initial pilot.
+## 5. Connect deterministic triggers and scheduling
+
+- Handle PR readiness, new commits, completed checks and closure events.
+- Reconcile periodically for recovery, without model calls when no new work exists.
+- Preserve the state store across runs; fresh runner disks are not durable.
+- Validate webhook signatures and repository allowlists.
+- Add rate-limit handling, metrics and actionable alerts.
+
+No recurring trigger or automatic merge is enabled.

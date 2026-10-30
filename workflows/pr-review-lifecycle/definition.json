@@ -1,0 +1,198 @@
+{
+  "_version": 1,
+  "id": "pr-review-lifecycle",
+  "status": "scaffold",
+  "enabled": false,
+  "limits": {
+    "max_repair_attempts": 2,
+    "max_stage_visits": 3,
+    "on_exhaustion": "human"
+  },
+  "nodes": [
+    {
+      "id": "event",
+      "stage": "receive-event"
+    },
+    {
+      "id": "snapshot",
+      "stage": "snapshot-pr"
+    },
+    {
+      "id": "terminal",
+      "stage": "pr-terminal"
+    },
+    {
+      "id": "stop",
+      "stage": "record-terminal"
+    },
+    {
+      "id": "eligible",
+      "stage": "review-eligible"
+    },
+    {
+      "id": "claim",
+      "stage": "claim-review"
+    },
+    {
+      "id": "new_work",
+      "stage": "new-work"
+    },
+    {
+      "id": "packet",
+      "stage": "build-packet"
+    },
+    {
+      "id": "current",
+      "stage": "revision-current"
+    },
+    {
+      "id": "review",
+      "stage": "independent-review",
+      "existing_worker": "workflows/pr-review/workflow.toml"
+    },
+    {
+      "id": "validate",
+      "stage": "validate-review"
+    },
+    {
+      "id": "save",
+      "stage": "save-review"
+    },
+    {
+      "id": "publish_enabled",
+      "stage": "publication-enabled"
+    },
+    {
+      "id": "recheck",
+      "stage": "recheck-pr"
+    },
+    {
+      "id": "publish_current",
+      "stage": "revision-current"
+    },
+    {
+      "id": "comment",
+      "stage": "publish-comment"
+    },
+    {
+      "id": "wait",
+      "stage": "record-wait"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "event"
+    },
+    {
+      "from": "event",
+      "to": "snapshot"
+    },
+    {
+      "from": "snapshot",
+      "to": "terminal"
+    },
+    {
+      "from": "terminal",
+      "to": "stop",
+      "label": "Closed / merged",
+      "condition": "context.pr_terminal=true"
+    },
+    {
+      "from": "terminal",
+      "to": "eligible",
+      "label": "Open"
+    },
+    {
+      "from": "stop",
+      "to": "exit"
+    },
+    {
+      "from": "eligible",
+      "to": "claim",
+      "label": "Ready and green",
+      "condition": "context.review_eligible=true"
+    },
+    {
+      "from": "eligible",
+      "to": "wait",
+      "label": "Draft / pending / blocked"
+    },
+    {
+      "from": "claim",
+      "to": "new_work"
+    },
+    {
+      "from": "new_work",
+      "to": "packet",
+      "label": "New claim",
+      "condition": "context.new_work=true"
+    },
+    {
+      "from": "new_work",
+      "to": "wait",
+      "label": "Already claimed / saved"
+    },
+    {
+      "from": "packet",
+      "to": "current"
+    },
+    {
+      "from": "current",
+      "to": "review",
+      "label": "Current",
+      "condition": "context.revision_current=true"
+    },
+    {
+      "from": "current",
+      "to": "wait",
+      "label": "Changed / blocked"
+    },
+    {
+      "from": "review",
+      "to": "validate"
+    },
+    {
+      "from": "validate",
+      "to": "save"
+    },
+    {
+      "from": "save",
+      "to": "publish_enabled"
+    },
+    {
+      "from": "publish_enabled",
+      "to": "recheck",
+      "label": "Enabled",
+      "condition": "context.publish_enabled=true"
+    },
+    {
+      "from": "publish_enabled",
+      "to": "wait",
+      "label": "Save only"
+    },
+    {
+      "from": "recheck",
+      "to": "publish_current"
+    },
+    {
+      "from": "publish_current",
+      "to": "comment",
+      "label": "Current and eligible",
+      "condition": "context.revision_current=true"
+    },
+    {
+      "from": "publish_current",
+      "to": "wait",
+      "label": "Changed / blocked"
+    },
+    {
+      "from": "comment",
+      "to": "wait"
+    },
+    {
+      "from": "wait",
+      "to": "exit"
+    }
+  ]
+}

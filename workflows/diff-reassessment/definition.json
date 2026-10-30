@@ -1,0 +1,136 @@
+{
+  "_version": 1,
+  "id": "diff-reassessment",
+  "status": "scaffold",
+  "enabled": false,
+  "limits": {
+    "max_repair_attempts": 2,
+    "max_stage_visits": 3,
+    "on_exhaustion": "human"
+  },
+  "nodes": [
+    {
+      "id": "diff",
+      "stage": "collect-diff"
+    },
+    {
+      "id": "impact",
+      "stage": "analyze-impact"
+    },
+    {
+      "id": "policy",
+      "stage": "apply-policy"
+    },
+    {
+      "id": "current",
+      "stage": "scope-current"
+    },
+    {
+      "id": "invalidate",
+      "stage": "invalidate-approval"
+    },
+    {
+      "id": "approve_scope",
+      "stage": "scope-approval",
+      "roles": [
+        "service-owner",
+        "relevant-specialist-if-R3"
+      ],
+      "approval": true,
+      "record_fields": [
+        "actor",
+        "roles",
+        "demand_id",
+        "repository",
+        "head_sha",
+        "base_sha",
+        "artifact_digest",
+        "scope_digest",
+        "policy_version",
+        "workflow_id",
+        "stage_id",
+        "target_branch"
+      ]
+    },
+    {
+      "id": "record",
+      "stage": "validate-approval"
+    },
+    {
+      "id": "revise",
+      "stage": "plan"
+    },
+    {
+      "id": "save",
+      "stage": "save-assessment"
+    },
+    {
+      "id": "stopped",
+      "stage": "record-stop"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "diff"
+    },
+    {
+      "from": "diff",
+      "to": "impact"
+    },
+    {
+      "from": "impact",
+      "to": "policy"
+    },
+    {
+      "from": "policy",
+      "to": "current"
+    },
+    {
+      "from": "current",
+      "to": "save",
+      "label": "Current",
+      "condition": "context.scope_current=true"
+    },
+    {
+      "from": "current",
+      "to": "invalidate",
+      "label": "Broader / uncertain / stale"
+    },
+    {
+      "from": "invalidate",
+      "to": "approve_scope"
+    },
+    {
+      "from": "approve_scope",
+      "to": "record",
+      "label": "[A] Approve revised scope"
+    },
+    {
+      "from": "approve_scope",
+      "to": "revise",
+      "label": "[R] Revise"
+    },
+    {
+      "from": "approve_scope",
+      "to": "stopped",
+      "label": "[S] Stop"
+    },
+    {
+      "from": "revise",
+      "to": "approve_scope"
+    },
+    {
+      "from": "record",
+      "to": "save"
+    },
+    {
+      "from": "save",
+      "to": "exit"
+    },
+    {
+      "from": "stopped",
+      "to": "exit"
+    }
+  ]
+}

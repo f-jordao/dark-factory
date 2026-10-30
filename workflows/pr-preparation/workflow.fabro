@@ -1,0 +1,29 @@
+// Generated from definition.json. Content and execution bindings are pending.
+// Human selections are not authenticated approval records by themselves.
+digraph PrPreparation {
+    graph [default_fidelity="full", default_max_retries=0, max_node_visits=3, on_failure="exit"]
+    start [shape=Mdiamond, label="Start"]
+    scaffold_guard [shape=parallelogram, label="Content pending — execution blocked", script="printf '%s\\n' 'Workflow scaffold: stage content and trusted execution bindings are pending.'; exit 78", goal_gate=true, max_retries=0]
+    exit [shape=Msquare, label="End / governed handoff"]
+    describe [shape=box, label="Prepare PR description and evidence", backend="acp", acp.command="false", prompt="@../../stages/prepare-pr/prompt.md", timeout="12m", max_retries=0]
+    validate [shape=parallelogram, label="Validate PR proposal and exact branch", script="printf '%s\\n' 'Workflow scaffold: stage content and trusted execution bindings are pending.'; exit 78", max_retries=0]
+    enabled [shape=diamond, label="Draft PR publication explicitly enabled?"]
+    publish [shape=parallelogram, label="Open draft PR once", script="printf '%s\\n' 'Workflow scaffold: stage content and trusted execution bindings are pending.'; exit 78", max_retries=0]
+    record [shape=parallelogram, label="Persist PR identity and revision", script="printf '%s\\n' 'Workflow scaffold: stage content and trusted execution bindings are pending.'; exit 78", max_retries=0]
+    save [shape=parallelogram, label="Save PR proposal without publication", script="printf '%s\\n' 'Workflow scaffold: stage content and trusted execution bindings are pending.'; exit 78", max_retries=0]
+    start -> scaffold_guard
+    scaffold_guard -> exit [label="Content pending"]
+    scaffold_guard -> describe [condition="outcome=succeeded"]
+    describe -> validate [condition="outcome=succeeded"]
+    validate -> enabled [condition="outcome=succeeded"]
+    enabled -> publish [label="Authorized and current", condition="context.pr_publication_enabled=true && context.revision_current=true"]
+    enabled -> save [label="Save proposal only"]
+    publish -> record [condition="outcome=succeeded"]
+    record -> exit [condition="outcome=succeeded"]
+    save -> exit [condition="outcome=succeeded"]
+    describe -> exit [label="Failed / unanswered"]
+    validate -> exit [label="Failed / unanswered"]
+    publish -> exit [label="Failed / unanswered"]
+    record -> exit [label="Failed / unanswered"]
+    save -> exit [label="Failed / unanswered"]
+}
