@@ -21,6 +21,7 @@ Date: 30 October 2026.
 | Fabro validation of all scaffold graphs | Pass; 13 graphs; intentional no-retry warning on each scaffold guard |
 | Real Fabro scaffold guard | Pass; feature scaffold stopped at its failed guard, zero agent or human stages and zero model calls |
 | Offline disabled-definition registration | Pass; repeat registration is unchanged; conflicts preserve existing definitions; no run or schedule endpoint used |
+| Live Fabro scaffold registration and UI | Pass; all 13 definitions visible under Automations, every Run button disabled; repeat registration unchanged |
 | Tool activity in successful ACP exports | No tool-related events observed |
 | Actual review publication | Not yet exercised; offline publisher tests pass |
 
@@ -50,6 +51,10 @@ Local evidence, excluded from Git:
 - Cancellation fixture: Fabro run `01M6673ZEZJT8YEAAPD6BKEG7X`.
 - Scaffold guard: Fabro run `01M66G30T439ZE41KQFBNXRZTE`; only `start` and
   `scaffold_guard` ran. Its failed terminal state is the expected content guard.
+- Disabled registration: `.dark-factory/runtime/scaffold-registration.json`.
+  The 13 definitions target scaffold commit
+  `dd6ae769b5e3b58b7967dcb1f3ba3b6ec53533b5`; no run or schedule was created
+  by registration.
 
 The 60 offline tests cover suppression of ineligible and duplicate work,
 revision races, claims and recovery, publication retries, policy invalidation,

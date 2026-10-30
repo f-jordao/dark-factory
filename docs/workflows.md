@@ -133,6 +133,11 @@ The supported **Automations** page can hold these definitions with their sole
 API trigger disabled and no schedule. They are visible placeholders, not
 operational automations.
 
+The initial local registration is complete and visible in Fabro. All 13
+definitions are pinned to scaffold commit
+`dd6ae769b5e3b58b7967dcb1f3ba3b6ec53533b5`. A later documentation commit
+does not change that source. Their Run buttons are disabled.
+
 After publishing the scaffold commit:
 
 ```bash
@@ -144,6 +149,8 @@ Registration pins each target to that immutable commit, verifies disabled
 triggers, and creates no run. Repeating it with the same definitions creates
 no duplicates. If an existing definition differs, it is left untouched and the
 command stops before writing. It does not enable, schedule or replace anything.
+Use the same pinned ref when repeating verification of the initial registration.
+Updating a target revision is a separate explicit change.
 
 ## Fill content next
 
